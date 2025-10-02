@@ -6,14 +6,6 @@ import generated.*;
 
 import java.util.*;
 
-/**
- * Semantic analyzer for SPL using ANTLR parse tree listener
- * Performs static semantic checking including:
- * - Duplicate declaration detection
- * - Undeclared variable/procedure/function usage detection
- * - Name conflict detection at EVERYWHERE scope
- * - Parameter shadowing detection
- */
 public class SPLSemanticAnalyzer extends SPLBaseListener {
     private SymbolTable symbolTable;
     private Stack<ScopeInfo> scopeStack;

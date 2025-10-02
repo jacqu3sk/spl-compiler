@@ -1,8 +1,5 @@
 package symbolTable;
 
-import symbolTable.ScopeType;
-import symbolTable.SymbolType;
-
 public class SymbolEntry {
     private String name;
     private SymbolType type;  // VARIABLE, PROCEDURE, FUNCTION
