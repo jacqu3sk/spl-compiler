@@ -1,27 +1,6 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
-class SyntaxErrorListener extends BaseErrorListener {
-    private boolean hasErrors = false;
-    
-    @Override
-    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
-                           int line, int charPositionInLine, String msg,
-                           RecognitionException e) {
-        hasErrors = true;
-        System.err.println("Syntax Error at line " + line + ", position " + charPositionInLine + ": " + msg);
-        
-        if (offendingSymbol instanceof Token) {
-            Token token = (Token) offendingSymbol;
-            System.err.println("Offending token: '" + token.getText() + "'");
-        }
-    }
-    
-    public boolean hasErrors() {
-        return hasErrors;
-    }
-}
-
 public class Main {
     public static void main(String[] args) throws Exception {
         // Example SPL program
@@ -79,6 +58,22 @@ public class Main {
         // You can then traverse the parse tree using a Listener
         // Example with a Listener:
         ParseTreeWalker walker = new ParseTreeWalker();
+        
+        // Create and use the symbol table builder
+        SPLSymbolTableBuilder symbolTableBuilder = new SPLSymbolTableBuilder();
+        walker.walk(symbolTableBuilder, tree);
+        
+        // Print symbol table results
+        symbolTableBuilder.printSymbolTable();
+        
+        // Check for semantic errors
+        if (symbolTableBuilder.hasErrors()) {
+            symbolTableBuilder.printErrors();
+        } else {
+            System.out.println("No semantic errors found!");
+        }
+        
+        // Original listener example
         SPLBaseListener listener = new SPLBaseListener() {
             @Override
             public void enterSpl_prog(SPLParser.Spl_progContext ctx) {
