@@ -1,11 +1,10 @@
 package symbolTable;
 
-/**
- * Enumeration of different scope types in SPL
- */
 public enum ScopeType {
-    GLOBAL,      // Global scope (glob section)
-    FUNCTION,    // Function scope
-    PROCEDURE,   // Procedure scope
-    MAIN         // Main program scope
+    EVERYWHERE,  // Top-level scope
+    GLOBAL,      // Global variables
+    PROCEDURE,   // Procedure definitions scope
+    FUNCTION,    // Function definitions scope
+    MAIN,        // Main program scope
+    LOCAL        // Local scope within procedure/function
 }

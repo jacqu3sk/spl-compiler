@@ -3,136 +3,256 @@ package symbolTable;
 import java.util.*;
 
 /**
- * Represents a symbol table for a specific scope in SPL
+ * Symbol table for the SPL compiler
+ * Manages all symbols and their scope information
  */
 public class SymbolTable {
-    private final Map<String, Symbol> symbols;
-    private final SymbolTable parent;
-    private final String scopeName;
-    private final ScopeType scopeType;
+    // Main symbol storage: maps node ID to symbol entry
+    private Map<Integer, SymbolEntry> table;
     
-    /**
-     * Constructor for SymbolTable
-     * @param scopeName Name of this scope (e.g., "Global", "function_add", "main")
-     * @param scopeType Type of this scope
-     * @param parent Parent symbol table (null for global scope)
-     */
-    public SymbolTable(String scopeName, ScopeType scopeType, SymbolTable parent) {
-        this.symbols = new HashMap<>();
-        this.scopeName = scopeName;
-        this.scopeType = scopeType;
-        this.parent = parent;
+    // Quick lookup maps for different scopes
+    private Map<String, SymbolEntry> globalVariables;
+    private Map<String, SymbolEntry> procedures;
+    private Map<String, SymbolEntry> functions;
+    private Map<String, SymbolEntry> mainVariables;
+    
+    // Local scope storage: maps scopeOwner to local symbols
+    // Key: procedure/function name, Value: map of variable names to entries
+    private Map<String, Map<String, SymbolEntry>> localScopes;
+    
+    // Node ID counter
+    private int nextNodeId;
+    
+    // Error messages
+    private List<String> errors;
+    
+    public SymbolTable() {
+        this.table = new HashMap<>();
+        this.globalVariables = new HashMap<>();
+        this.procedures = new HashMap<>();
+        this.functions = new HashMap<>();
+        this.mainVariables = new HashMap<>();
+        this.localScopes = new HashMap<>();
+        this.nextNodeId = 1;
+        this.errors = new ArrayList<>();
     }
     
     /**
-     * Add a symbol to this symbol table
-     * @param symbol The symbol to add
-     * @return true if added successfully, false if symbol already exists in this scope
+     * Get next available node ID
      */
-    public boolean addSymbol(Symbol symbol) {
-        if (symbols.containsKey(symbol.getName())) {
-            return false; // Symbol already exists in this scope
+    public int getNextNodeId() {
+        return nextNodeId++;
+    }
+    
+    /**
+     * Add a symbol to the table
+     * @return true if successful, false if duplicate
+     */
+    public boolean addSymbol(SymbolEntry entry) {
+        table.put(entry.getNodeId(), entry);
+        
+        switch (entry.getScope()) {
+            case GLOBAL:
+                if (globalVariables.containsKey(entry.getName())) {
+                    errors.add("Error: Variable '" + entry.getName() + 
+                              "' already declared in global scope");
+                    return false;
+                }
+                globalVariables.put(entry.getName(), entry);
+                break;
+                
+            case PROCEDURE:
+                if (procedures.containsKey(entry.getName())) {
+                    errors.add("Error: Procedure '" + entry.getName() + 
+                              "' already declared");
+                    return false;
+                }
+                procedures.put(entry.getName(), entry);
+                break;
+                
+            case FUNCTION:
+                if (functions.containsKey(entry.getName())) {
+                    errors.add("Error: Function '" + entry.getName() + 
+                              "' already declared");
+                    return false;
+                }
+                functions.put(entry.getName(), entry);
+                break;
+                
+            case MAIN:
+                if (mainVariables.containsKey(entry.getName())) {
+                    errors.add("Error: Variable '" + entry.getName() + 
+                              "' already declared in main scope");
+                    return false;
+                }
+                mainVariables.put(entry.getName(), entry);
+                break;
+                
+            case LOCAL:
+                String owner = entry.getScopeOwner();
+                localScopes.putIfAbsent(owner, new HashMap<>());
+                Map<String, SymbolEntry> localScope = localScopes.get(owner);
+                
+                if (localScope.containsKey(entry.getName())) {
+                    errors.add("Error: Variable '" + entry.getName() + 
+                              "' already declared in local scope of " + owner);
+                    return false;
+                }
+                localScope.put(entry.getName(), entry);
+                break;
         }
-        symbols.put(symbol.getName(), symbol);
+        
         return true;
     }
     
     /**
-     * Check if a symbol exists in this scope only (not parent scopes)
-     * @param name Name of the symbol to check
-     * @return true if symbol exists in this scope
+     * Check for name conflicts at EVERYWHERE scope level
      */
-    public boolean containsSymbol(String name) {
-        return symbols.containsKey(name);
-    }
-    
-    /**
-     * Look up a symbol in this scope only (not parent scopes)
-     * @param name Name of the symbol to look up
-     * @return Symbol if found, null otherwise
-     */
-    public Symbol getSymbol(String name) {
-        return symbols.get(name);
-    }
-    
-    /**
-     * Look up a symbol in this scope and all parent scopes
-     * @param name Name of the symbol to look up
-     * @return Symbol if found anywhere in scope chain, null otherwise
-     */
-    public Symbol lookupSymbol(String name) {
-        Symbol symbol = symbols.get(name);
-        if (symbol != null) {
-            return symbol;
-        }
-        
-        // If not found in current scope, check parent scope
-        if (parent != null) {
-            return parent.lookupSymbol(name);
-        }
-        
-        return null; // Not found anywhere
-    }
-    
-    /**
-     * Get all symbols in this scope
-     * @return Collection of all symbols in this scope
-     */
-    public Collection<Symbol> getAllSymbols() {
-        return symbols.values();
-    }
-    
-    /**
-     * Get the parent symbol table
-     * @return Parent symbol table or null if this is the global scope
-     */
-    public SymbolTable getParent() {
-        return parent;
-    }
-    
-    /**
-     * Get the scope name
-     * @return Name of this scope
-     */
-    public String getScopeName() {
-        return scopeName;
-    }
-    
-    /**
-     * Get the scope type
-     * @return Type of this scope
-     */
-    public ScopeType getScopeType() {
-        return scopeType;
-    }
-    
-    /**
-     * Get the number of symbols in this scope
-     * @return Number of symbols
-     */
-    public int size() {
-        return symbols.size();
-    }
-    
-    /**
-     * Check if this scope is empty
-     * @return true if no symbols in this scope
-     */
-    public boolean isEmpty() {
-        return symbols.isEmpty();
-    }
-    
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("SymbolTable[%s]:\n", scopeName));
-        if (symbols.isEmpty()) {
-            sb.append("  (empty)\n");
-        } else {
-            for (Symbol symbol : symbols.values()) {
-                sb.append("  ").append(symbol).append("\n");
+    public void checkEverywhereConflicts() {
+        // Check: no variable name = function name
+        for (String varName : globalVariables.keySet()) {
+            if (functions.containsKey(varName)) {
+                errors.add("Error: Global variable '" + varName + 
+                          "' conflicts with function name");
+            }
+            if (procedures.containsKey(varName)) {
+                errors.add("Error: Global variable '" + varName + 
+                          "' conflicts with procedure name");
             }
         }
-        return sb.toString();
+        
+        // Check: no function name = procedure name
+        for (String funcName : functions.keySet()) {
+            if (procedures.containsKey(funcName)) {
+                errors.add("Error: Function '" + funcName + 
+                          "' conflicts with procedure name");
+            }
+        }
+    }
+    
+    /**
+     * Lookup a variable in the appropriate scope chain
+     * @param name Variable name to look up
+     * @param currentScope Current procedure/function name (null if in main/global)
+     * @param scopeType Current scope type
+     * @return SymbolEntry if found, null otherwise
+     */
+    public SymbolEntry lookupVariable(String name, String currentScope, 
+                                     ScopeType scopeType) {
+        // First, check local scope if applicable (for PROCEDURE/FUNCTION local scopes)
+        if (scopeType == ScopeType.LOCAL && currentScope != null) {
+            Map<String, SymbolEntry> localScope = localScopes.get(currentScope);
+            if (localScope != null && localScope.containsKey(name)) {
+                return localScope.get(name);
+            }
+        }
+        
+        // Then check main scope if applicable
+        if (scopeType == ScopeType.MAIN) {
+            if (mainVariables.containsKey(name)) {
+                return mainVariables.get(name);
+            }
+        }
+        
+        // Finally, check global scope (accessible from everywhere)
+        if (globalVariables.containsKey(name)) {
+            return globalVariables.get(name);
+        }
+        
+        return null; // Not found
+    }
+    
+    /**
+     * Check if a procedure exists
+     */
+    public boolean procedureExists(String name) {
+        return procedures.containsKey(name);
+    }
+    
+    /**
+     * Check if a function exists
+     */
+    public boolean functionExists(String name) {
+        return functions.containsKey(name);
+    }
+    
+    /**
+     * Get all errors
+     */
+    public List<String> getErrors() {
+        return errors;
+    }
+    
+    /**
+     * Check if there are any errors
+     */
+    public boolean hasErrors() {
+        return !errors.isEmpty();
+    }
+    
+    /**
+     * Get symbol entry by node ID
+     */
+    public SymbolEntry getSymbolByNodeId(int nodeId) {
+        return table.get(nodeId);
+    }
+    
+    /**
+     * Print the symbol table in a readable format
+     */
+    public void printTable() {
+        System.out.println("\n========== SYMBOL TABLE ==========");
+        
+        System.out.println("\n--- Global Variables ---");
+        if (globalVariables.isEmpty()) {
+            System.out.println("  (none)");
+        } else {
+            globalVariables.values().forEach(e -> 
+                System.out.println("  " + e.getName() + " (NodeID: " + e.getNodeId() + ")"));
+        }
+        
+        System.out.println("\n--- Procedures ---");
+        if (procedures.isEmpty()) {
+            System.out.println("  (none)");
+        } else {
+            procedures.values().forEach(e -> 
+                System.out.println("  " + e.getName() + " (NodeID: " + e.getNodeId() + ")"));
+        }
+        
+        System.out.println("\n--- Functions ---");
+        if (functions.isEmpty()) {
+            System.out.println("  (none)");
+        } else {
+            functions.values().forEach(e -> 
+                System.out.println("  " + e.getName() + " (NodeID: " + e.getNodeId() + ")"));
+        }
+        
+        System.out.println("\n--- Main Variables ---");
+        if (mainVariables.isEmpty()) {
+            System.out.println("  (none)");
+        } else {
+            mainVariables.values().forEach(e -> 
+                System.out.println("  " + e.getName() + " (NodeID: " + e.getNodeId() + ")"));
+        }
+        
+        System.out.println("\n--- Local Scopes ---");
+        if (localScopes.isEmpty()) {
+            System.out.println("  (none)");
+        } else {
+            localScopes.forEach((owner, locals) -> {
+                System.out.println("  In " + owner + ":");
+                if (locals.isEmpty()) {
+                    System.out.println("    (none)");
+                } else {
+                    locals.values().forEach(e -> {
+                        String marker = e.isParameter() ? " [parameter]" : " [local]";
+                        System.out.println("    " + e.getName() + marker + 
+                            " (NodeID: " + e.getNodeId() + ")");
+                    });
+                }
+            });
+        }
+        
+        System.out.println("\n==================================");
     }
 }
