@@ -10,13 +10,22 @@ public class Main {
                 y
             }
             proc {
+                hx() {
+                    local{}
+                    halt
+                }
             }
             func {
+                gx(value) {
+                    local{}
+                    halt;
+                    return value
+                }
             }
             main {
                 var {
-                    x
-                    y
+                    a
+                    b
                 }
                 x = (10 plus 5);
                 print x;
