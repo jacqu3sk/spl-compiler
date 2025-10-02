@@ -1,0 +1,12 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.debug.settings.enableRunDebugCodeLens": true,
+    "java.inlayHints.parameterNames.enabled": "all",
+    "maven.downloadSources": true,
+    "maven.executable.path": "mvn",
+    "java.configuration.maven.userSettings": null,
+    "java.maven.downloadSources": true,
+    "java.sources.organizeImports.starThreshold": 99,
+    "java.sources.organizeImports.staticStarThreshold": 99
+}
