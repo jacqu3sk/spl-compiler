@@ -1,3 +1,8 @@
+package symbolTable;
+
+import generated.SPLBaseListener;
+import generated.SPLParser;
+
 /**
  * SPL Symbol Table Builder using ANTLR Listener pattern
  * Builds symbol tables and performs semantic analysis for SPL programs

@@ -1,3 +1,5 @@
+package symbolTable;
+
 /**
  * Represents a symbol in the SPL symbol table
  */

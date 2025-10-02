@@ -1,3 +1,5 @@
+package parser;
+
 import org.antlr.v4.runtime.*;
 
 public class SyntaxErrorListener extends BaseErrorListener {

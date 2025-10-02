@@ -1,3 +1,5 @@
+package symbolTable;
+
 /**
  * Enumeration of different scope types in SPL
  */

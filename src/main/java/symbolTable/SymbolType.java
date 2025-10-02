@@ -1,3 +1,5 @@
+package symbolTable;
+
 /**
  * Enumeration of different symbol types in SPL
  */

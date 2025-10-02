@@ -1,5 +1,10 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import symbolTable.SPLSymbolTableBuilder;
+import parser.SyntaxErrorListener;
+import generated.SPLLexer;
+import generated.SPLParser;
+import generated.SPLBaseListener;
 
 public class Main {
     public static void main(String[] args) throws Exception {

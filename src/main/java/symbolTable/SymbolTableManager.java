@@ -1,3 +1,5 @@
+package symbolTable;
+
 import java.util.*;
 
 /**
