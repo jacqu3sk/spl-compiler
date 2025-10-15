@@ -81,6 +81,7 @@ public class SPLSemanticAnalyzer extends SPLBaseListener {
             
             SymbolEntry entry = new SymbolEntry(
                 varName,
+                symbolTable.generateAnonVarName(),
                 SymbolType.VARIABLE,
                 currentScope.getType(),
                 nodeId,
@@ -149,6 +150,7 @@ public class SPLSemanticAnalyzer extends SPLBaseListener {
         // Add procedure to symbol table
         SymbolEntry entry = new SymbolEntry(
             procName,
+            symbolTable.generateAnonProcName(),
             SymbolType.PROCEDURE,
             ScopeType.PROCEDURE,
             nodeId,
@@ -195,6 +197,7 @@ public class SPLSemanticAnalyzer extends SPLBaseListener {
         // Add function to symbol table
         SymbolEntry entry = new SymbolEntry(
             funcName,
+            symbolTable.generateAnonFuncName(),
             SymbolType.FUNCTION,
             ScopeType.FUNCTION,
             nodeId,

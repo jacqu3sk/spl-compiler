@@ -2,6 +2,7 @@ package symbolTable;
 
 public class SymbolEntry {
     private String name;
+    private String anonName;
     private SymbolType type;  // VARIABLE, PROCEDURE, FUNCTION
     private ScopeType scope;  // EVERYWHERE, GLOBAL, PROCEDURE, FUNCTION, MAIN, LOCAL
     private int nodeId;       // Unique identifier for the parse tree node
@@ -9,9 +10,10 @@ public class SymbolEntry {
     private boolean isParameter; // True if this is a parameter
     
     // Constructor
-    public SymbolEntry(String name, SymbolType type, ScopeType scope, 
+    public SymbolEntry(String name,  String anonName, SymbolType type, ScopeType scope, 
                        int nodeId, String scopeOwner, boolean isParameter) {
         this.name = name;
+        this.anonName = anonName;
         this.type = type;
         this.scope = scope;
         this.nodeId = nodeId;
@@ -26,7 +28,14 @@ public class SymbolEntry {
     public void setName(String newName) {
         name = newName;
     }
+
+    public String getAnonName() {
+        return anonName;
+    }
     
+    public void setAnonName(String newGenericName) {
+        anonName = newGenericName;
+    }
         
     public String getScopeOwner() {
         return scopeOwner;

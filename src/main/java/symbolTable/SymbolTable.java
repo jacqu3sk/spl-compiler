@@ -15,6 +15,11 @@ public class SymbolTable {
     private Map<String, SymbolEntry> procedures;
     private Map<String, SymbolEntry> functions;
     private Map<String, SymbolEntry> mainVariables;
+
+    // Anonymous name generators
+    private int anonVarCounter; // Counter for anonymous variable names
+    private int anonProcCounter; // Counter for anonymous procedure names
+    private int anonFuncCounter; // Counter for anonymous function names
     
     // Local scope storage: maps scopeOwner to local symbols
     // Key: procedure/function name, Value: map of variable names to entries
@@ -35,6 +40,9 @@ public class SymbolTable {
         this.localScopes = new HashMap<>();
         this.nextNodeId = 1;
         this.errors = new ArrayList<>();
+        this.anonVarCounter = 1;
+        this.anonProcCounter = 1;
+        this.anonFuncCounter = 1;
     }
     
     /**
@@ -43,7 +51,28 @@ public class SymbolTable {
     public int getNextNodeId() {
         return nextNodeId++;
     }
-    
+
+    /**
+     * Generate a unique anonymous variable name
+     */
+    public String generateAnonVarName() {
+        return "v_" + (anonVarCounter++);
+    }
+
+    /**
+     * Generate a unique anonymous procedure name
+     */
+    public String generateAnonProcName() {
+        return "p_" + (anonProcCounter++);
+    }
+
+    /**
+     * Generate a unique anonymous function name
+     */
+    public String generateAnonFuncName() {
+        return "f_" + (anonFuncCounter++);
+    }
+
     /**
      * Add a symbol to the table
      * @return true if successful, false if duplicate
@@ -208,7 +237,7 @@ public class SymbolTable {
             System.out.println("  (none)");
         } else {
             globalVariables.values().forEach(e -> 
-                System.out.println("  " + e.getName() + " (NodeID: " + e.getNodeId() + ")"));
+                System.out.println("  " + e.getName() + " -> " + e.getAnonName() + " (NodeID: " + e.getNodeId() + ")"));
         }
         
         System.out.println("\n--- Procedures ---");
@@ -216,7 +245,7 @@ public class SymbolTable {
             System.out.println("  (none)");
         } else {
             procedures.values().forEach(e -> 
-                System.out.println("  " + e.getName() + " (NodeID: " + e.getNodeId() + ")"));
+                System.out.println("  " + e.getName() + " -> " + e.getAnonName() + " (NodeID: " + e.getNodeId() + ")"));
         }
         
         System.out.println("\n--- Functions ---");
@@ -224,7 +253,7 @@ public class SymbolTable {
             System.out.println("  (none)");
         } else {
             functions.values().forEach(e -> 
-                System.out.println("  " + e.getName() + " (NodeID: " + e.getNodeId() + ")"));
+                System.out.println("  " + e.getName() + " -> " + e.getAnonName() + " (NodeID: " + e.getNodeId() + ")"));
         }
         
         System.out.println("\n--- Main Variables ---");
@@ -232,7 +261,7 @@ public class SymbolTable {
             System.out.println("  (none)");
         } else {
             mainVariables.values().forEach(e -> 
-                System.out.println("  " + e.getName() + " (NodeID: " + e.getNodeId() + ")"));
+                System.out.println("  " + e.getName() + " -> " + e.getAnonName() + " (NodeID: " + e.getNodeId() + ")"));
         }
         
         System.out.println("\n--- Local Scopes ---");
@@ -246,7 +275,7 @@ public class SymbolTable {
                 } else {
                     locals.values().forEach(e -> {
                         String marker = e.isParameter() ? " [parameter]" : " [local]";
-                        System.out.println("    " + e.getName() + marker + 
+                        System.out.println("    " + e.getName() + " -> " + e.getAnonName() + marker + 
                             " (NodeID: " + e.getNodeId() + ")");
                     });
                 }
