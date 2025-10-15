@@ -130,6 +130,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitSpl_prog(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitSpl_prog(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final Spl_progContext spl_prog() throws RecognitionException {
@@ -203,6 +208,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitVariables(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitVariables(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final VariablesContext variables() throws RecognitionException {
@@ -256,6 +266,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitVar(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitVar(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final VarContext var() throws RecognitionException {
@@ -298,6 +313,11 @@ public class SPLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitProcdefs(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitProcdefs(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -358,6 +378,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitPdef(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitPdef(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final PdefContext pdef() throws RecognitionException {
@@ -412,6 +437,11 @@ public class SPLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitFuncdefs(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitFuncdefs(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -475,6 +505,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitFdef(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitFdef(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final FdefContext fdef() throws RecognitionException {
@@ -536,6 +571,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitBody(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitBody(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final BodyContext body() throws RecognitionException {
@@ -584,6 +624,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitParam(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitParam(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final ParamContext param() throws RecognitionException {
@@ -626,6 +671,11 @@ public class SPLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitMaxthree(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitMaxthree(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -701,6 +751,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitMainprog(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitMainprog(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final MainprogContext mainprog() throws RecognitionException {
@@ -749,6 +804,11 @@ public class SPLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitAtom(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitAtom(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -807,6 +867,11 @@ public class SPLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitAlgo(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitAlgo(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -877,6 +942,11 @@ public class SPLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitInstr(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitInstr(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -974,6 +1044,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitAssign(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitAssign(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final AssignContext assign() throws RecognitionException {
@@ -1043,6 +1118,11 @@ public class SPLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitLoop(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitLoop(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1123,6 +1203,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitBranch(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitBranch(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final BranchContext branch() throws RecognitionException {
@@ -1201,6 +1286,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitOutput(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitOutput(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final OutputContext output() throws RecognitionException {
@@ -1259,6 +1349,11 @@ public class SPLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitInput(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitInput(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1343,6 +1438,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitTerm(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitTerm(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TermContext term() throws RecognitionException {
@@ -1414,6 +1514,11 @@ public class SPLParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitUnop(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitUnop(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final UnopContext unop() throws RecognitionException {
@@ -1459,6 +1564,11 @@ public class SPLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof SPLListener ) ((SPLListener)listener).exitBinop(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SPLVisitor ) return ((SPLVisitor<? extends T>)visitor).visitBinop(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
