@@ -25,7 +25,8 @@ public class TypeGetter extends SPLBaseVisitor<String> {
                     return ((visit(ctx.term(0)).equals("numeric")) ? "numeric" : "unknown");
                 case "boolean":
                     return ((visit(ctx.term(0)).equals("boolean")) ? "boolean" : "unknown");
-                default: return "unknown";
+                default: 
+                    return "unknown";
             }
         }
 

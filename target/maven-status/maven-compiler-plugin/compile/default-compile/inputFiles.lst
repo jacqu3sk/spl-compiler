@@ -1,6 +1,8 @@
 C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\src\main\java\SymbolTable.java
 C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\src\main\java\ScopeType.java
 C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\src\main\java\Main.java
+C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\src\main\java\ConsoleTypeErrorListener.java
+C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\src\main\java\TypeErrorListener.java
 C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\target\generated-sources\antlr4\SPLBaseVisitor.java
 C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\target\generated-sources\antlr4\SPLVisitor.java
 C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\src\main\java\SymbolTableManager.java
@@ -12,4 +14,5 @@ C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\target\generated-sources\an
 C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\src\main\java\SymbolType.java
 C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\src\main\java\SyntaxErrorListener.java
 C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\target\generated-sources\antlr4\SPLLexer.java
+C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\src\main\java\TypeGetter.java
 C:\Users\wesse\OneDrive\Desktop\CS\2025\spl-compiler\target\generated-sources\antlr4\SPLParser.java

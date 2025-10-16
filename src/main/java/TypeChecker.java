@@ -1,9 +1,20 @@
-
+import org.antlr.v4.runtime.ParserRuleContext;
 import java.util.ListIterator;
 
-public class TypeChecker<This> extends SPLBaseVisitor<Boolean> {
+public class TypeChecker extends SPLBaseVisitor<Boolean> {
 
-    private TypeGetter tg = new TypeGetter();
+    private final TypeGetter tg = new TypeGetter();
+    private final TypeErrorListener errorListener;
+
+    public TypeChecker(TypeErrorListener listener) {
+        this.errorListener = listener;
+    }
+
+    private void error(ParserRuleContext ctx, String message) {
+        if (errorListener != null) {
+            errorListener.onTypeError(ctx, message);
+        }
+    }
 
     @Override
     public Boolean visitSpl_prog(SPLParser.Spl_progContext ctx) {
@@ -142,12 +153,18 @@ public class TypeChecker<This> extends SPLBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitLoop(SPLParser.LoopContext ctx) {
-        return (tg.visit(ctx.term()).equals("boolean") && visit(ctx.algo()));
+        Boolean term_t = tg.visit(ctx.term()).equals("boolean");
+        if (!term_t) {
+            error(ctx, "Condition in loop must be boolean");
+            return false;
+        }
+        return (visit(ctx.algo()));
     }
 
     @Override
     public Boolean visitBranch(SPLParser.BranchContext ctx) {
         if (!tg.visit(ctx.term()).equals("boolean")) {
+            error(ctx, "Condition in branch must be boolean");
             return false;
         }
         ListIterator<SPLParser.AlgoContext> it = ctx.algo().listIterator();

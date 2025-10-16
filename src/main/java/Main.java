@@ -1,5 +1,8 @@
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -97,5 +100,16 @@ public class Main {
             
         };
         walker.walk(listener, tree);
+
+        // Type checking
+        TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
+        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        Boolean result = typeChecker.visit((SPLParser.Spl_progContext) tree);
+
+        if (result) {
+            System.out.println("Type checking passed!");
+        } else {
+            System.out.println("Type checking failed!");
+        }
     }
 }

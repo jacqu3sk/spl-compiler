@@ -1,4 +1,6 @@
 SPLParser$BodyContext.class
+SPL.interp
+SPLLexer.tokens
 SPLParser$MaxthreeContext.class
 SPLLexer.class
 SPLParser$AtomContext.class
@@ -23,7 +25,9 @@ SPLParser$FdefContext.class
 SPLBaseVisitor.class
 SPLParser$InputContext.class
 SPLParser.class
+SPL.tokens
 SPLParser$LoopContext.class
+SPLLexer.interp
 SPLParser$BinopContext.class
 SPLParser$FuncdefsContext.class
 SPLParser$VariablesContext.class
