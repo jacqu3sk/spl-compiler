@@ -1,3 +1,7 @@
+package typeChecker;
+
+import generated.*;
+
 public class TypeGetter extends SPLBaseVisitor<String> {
     
     @Override

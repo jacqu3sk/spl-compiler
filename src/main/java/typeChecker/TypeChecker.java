@@ -1,5 +1,11 @@
-import org.antlr.v4.runtime.ParserRuleContext;
+package typeChecker;
+
 import java.util.ListIterator;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+
+import generated.SPLBaseVisitor;
+import generated.SPLParser;
 
 public class TypeChecker extends SPLBaseVisitor<Boolean> {
 

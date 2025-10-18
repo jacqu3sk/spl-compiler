@@ -1,5 +1,6 @@
-import org.antlr.v4.runtime.ParserRuleContext;
+package typeChecker;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class ConsoleTypeErrorListener implements TypeErrorListener {
 
