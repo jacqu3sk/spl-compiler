@@ -1,13 +1,125 @@
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
+import generated.SPLLexer;
+import generated.SPLParser;
+import symbolTable.*;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
-        // Example SPL program
-        String input = """
+    public static void main(String[] args) {
+        try {
+            // Check if input file is provided
+            if (args.length < 1) {
+                System.out.println("\nRunning with example input instead...\n");
+                runWithExampleInput();
+                return;
+            }
+            
+            // Read input from file
+            String inputFile = args[0];
+            CharStream input = CharStreams.fromFileName(inputFile);
+            
+            // Run the compiler
+            compile(input, inputFile);
+            
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Compile the SPL program
+     */
+    public static void compile(CharStream input, String sourceName) {
+        System.out.println("=================================================");
+        System.out.println("SPL COMPILER - Semantic Analysis Phase");
+        System.out.println("=================================================");
+        System.out.println("Source: " + sourceName);
+        System.out.println("=================================================\n");
+        
+        // Step 1: Lexical Analysis
+        System.out.println("Phase 1: Lexical Analysis...");
+        SPLLexer lexer = new SPLLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        
+        // Step 2: Syntax Analysis (Parsing)
+        System.out.println("Phase 2: Syntax Analysis...");
+        SPLParser parser = new SPLParser(tokens);
+        
+        // Error handling for parser
+        parser.removeErrorListeners();
+        parser.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer,
+                                  Object offendingSymbol,
+                                  int line, int charPositionInLine,
+                                  String msg,
+                                  RecognitionException e) {
+                System.err.println("Syntax Error at line " + line + ":" + 
+                                 charPositionInLine + " - " + msg);
+            }
+        });
+        
+        ParseTree tree = parser.spl_prog();
+        
+        // Check if parsing was successful
+        if (parser.getNumberOfSyntaxErrors() > 0) {
+            System.out.println("\n✗ Compilation failed due to syntax errors.");
+            return;
+        }
+        
+        System.out.println("✓ Parsing successful");
+        
+        // Step 3: Semantic Analysis
+        System.out.println("\nPhase 3: Semantic Analysis...");
+        ParseTreeWalker walker = new ParseTreeWalker();
+        SPLSemanticAnalyzer analyzer = new SPLSemanticAnalyzer();
+        
+        // Walk the parse tree
+        walker.walk(analyzer, tree);
+        
+        // Get results
+        SymbolTable symbolTable = analyzer.getSymbolTable();
+        
+        // Step 4: Report Results
+        System.out.println("\n=================================================");
+        System.out.println("SEMANTIC ANALYSIS RESULTS");
+        System.out.println("=================================================");
+        
+        if (symbolTable.hasErrors()) {
+            System.out.println("\n✗ Semantic errors found:\n");
+            int errorNum = 1;
+            for (String error : symbolTable.getErrors()) {
+                System.out.println(errorNum + ". " + error);
+                errorNum++;
+            }
+            System.out.println("\nTotal errors: " + symbolTable.getErrors().size());
+        } else {
+            System.out.println("\n✓ No semantic errors found!");
+            System.out.println("✓ All name-scope rules are satisfied.");
+        }
+        
+        // Print symbol table
+        symbolTable.printTable();
+        
+        System.out.println("\n=================================================");
+        if (!symbolTable.hasErrors()) {
+            System.out.println("Compilation Status: SUCCESS");
+            System.out.println("Ready to proceed to next phase (code generation)");
+        } else {
+            System.out.println("Compilation Status: FAILED");
+            System.out.println("Fix semantic errors before proceeding");
+        }
+        System.out.println("=================================================\n");
+    }
+    
+    /**
+     * Run with example SPL program for demonstration
+     */
+    public static void runWithExampleInput() {
+        // Example SPL program with various semantic scenarios
+        String exampleProgram = 
+            """
             glob {
                 x
                 y
@@ -36,80 +148,12 @@ public class Main {
             }
             """;
         
-        CharStream charStream = CharStreams.fromString(input);
-        SPLLexer lexer = new SPLLexer(charStream);
+        System.out.println("Example SPL Program:");
+        System.out.println("-------------------");
+        System.out.println(exampleProgram);
+        System.out.println("-------------------\n");
         
-        // Create custom error listener
-        SyntaxErrorListener errorListener = new SyntaxErrorListener();
-        
-        // Remove default error listeners and add our custom one
-        lexer.removeErrorListeners();
-        lexer.addErrorListener(errorListener);
-        
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        SPLParser parser = new SPLParser(tokens);
-        
-        // Add error listener to parser as well
-        parser.removeErrorListeners();
-        parser.addErrorListener(errorListener);
-
-        ParseTree tree = parser.spl_prog(); // Start parsing from the 'spl_prog' rule
-
-        // Check if there were any syntax errors
-        if (errorListener.hasErrors()) {
-            System.err.println("\nParsing failed due to syntax errors.");
-            return;
-        }
-
-        System.out.println("Parsing completed successfully!\n");
-
-        // Print the parse tree
-        System.out.println("Parse Tree:");
-        System.out.println(tree.toStringTree(parser));
-        
-        // You can then traverse the parse tree using a Listener
-        // Example with a Listener:
-        ParseTreeWalker walker = new ParseTreeWalker();
-        
-        // Create and use the symbol table builder
-        SPLSymbolTableBuilder symbolTableBuilder = new SPLSymbolTableBuilder();
-        walker.walk(symbolTableBuilder, tree);
-        
-        // Print symbol table results
-        symbolTableBuilder.printSymbolTable();
-        
-        // Check for semantic errors
-        if (symbolTableBuilder.hasErrors()) {
-            symbolTableBuilder.printErrors();
-        } else {
-            System.out.println("No semantic errors found!");
-        }
-        
-        // Original listener example
-        SPLBaseListener listener = new SPLBaseListener() {
-            @Override
-            public void enterSpl_prog(SPLParser.Spl_progContext ctx) {
-                System.out.println("Entering SPL program");
-            }
-            
-            @Override
-            public void exitSpl_prog(SPLParser.Spl_progContext ctx) {
-                System.out.println("Exiting SPL program");
-            }
-
-            
-        };
-        walker.walk(listener, tree);
-
-        // Type checking
-        TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
-        Boolean result = typeChecker.visit((SPLParser.Spl_progContext) tree);
-
-        if (result) {
-            System.out.println("Type checking passed!");
-        } else {
-            System.out.println("Type checking failed!");
-        }
+        CharStream input = CharStreams.fromString(exampleProgram);
+        compile(input, "example.spl");
     }
 }

@@ -47,6 +47,8 @@
                 <configuration>
                     <listener>true</listener>
                     <visitor>true</visitor>
+                    <outputDirectory>${project.build.directory}/generated-sources/antlr4/generated</outputDirectory>
+
                 </configuration>
                 <executions>
                     <execution>
