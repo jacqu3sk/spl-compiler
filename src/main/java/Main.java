@@ -3,6 +3,7 @@ import org.antlr.v4.runtime.tree.*;
 import generated.SPLLexer;
 import generated.SPLParser;
 import symbolTable.*;
+import typeChecker.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -111,6 +112,16 @@ public class Main {
             System.out.println("Fix semantic errors before proceeding");
         }
         System.out.println("=================================================\n");
+
+        TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
+        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
+        if (tc_ok) {
+            System.out.println("Type Checking Completed Successfully!");
+        }
+        else {
+            System.out.println("Type Checking failed");
+        }
     }
     
     /**
