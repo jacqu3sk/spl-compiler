@@ -174,12 +174,12 @@ public class Translator extends SPLBaseVisitor<String> {
             symbolTable.updateVariable(symbol.getName(), symbol.getScopeOwner(), symbol.getScope(),tempVariable.printTemp() );
             String t = tempVariable.printTemp();*/
 
-            label.newLabel();
+           /*  label.newLabel();
             String l1 = label.printLabel();
             label.newLabel();
-            String l2 = label.printLabel();
+            String l2 = label.printLabel();*/
 
-            String t1 =visitTerm(ctx.term(), l1, l2);
+            String t1 =visitTerm(ctx.term(), null, null);
 
             String varCode = symbol.getRenamedVariable() + " = " + t1;
             intermediateCode.append(varCode);
@@ -221,26 +221,22 @@ public class Translator extends SPLBaseVisitor<String> {
 
     public String visitBranch(SPLParser.BranchContext ctx)
     {
-        StringBuilder code = new StringBuilder();
-
         label.newLabel();
         String l1 = label.printLabel();
         label.newLabel();
         String l2 = label.printLabel();
         
-        intermediateCode.append("IF ");
-        visitTerm(ctx.term(),l1,l2);
-        intermediateCode.append(" THEN " + l1 + "\n");
+        String condition = visitTerm(ctx.term(),l1,l2);
+        intermediateCode.append("IF " + condition + " THEN " + l1 + "\n");
         if (ctx.algo(1)!=null)
         {
             visitAlgo(ctx.algo(1));
         }
-        code.append("GOTO "+l2+"\n");
-        code.append("REM "+l1+"\n");
+        intermediateCode.append("GOTO "+l2+"\n");
+        intermediateCode.append("REM "+l1+"\n");
         visitAlgo(ctx.algo(0));
-        code.append("REM "+l2+"\n");
+        intermediateCode.append("REM "+l2+"\n");
 
-        intermediateCode.append(code.toString());
         return null;
     }
 
@@ -308,6 +304,11 @@ public class Translator extends SPLBaseVisitor<String> {
             {   
                 tempVariable.newTemp();
                 t2 = tempVariable.printTemp();
+            }
+
+            if (binopCode.equals("="))
+            {
+                return t1 + binopCode + t2 ;
             }
             tempVariable.newTemp();
             String t3 = tempVariable.printTemp();
