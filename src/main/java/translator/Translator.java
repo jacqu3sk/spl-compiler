@@ -3,12 +3,7 @@ package translator;
  * visitlates source code to intermediate code
  */
 
-import java.util.List;
-import java.util.Map;
 
-import javax.annotation.processing.Generated;
-
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.*;
 
 import generated.SPLBaseVisitor;
@@ -109,7 +104,6 @@ public class Translator extends SPLBaseVisitor<String> {
         } else if (ctx.getText().startsWith("print")) {
             intermediateCode.append("PRINT ");
             visitOutput(ctx.output());
-            
 
         }else if (ctx.assign()!=null) {
            visitAssign(ctx.assign());
@@ -160,7 +154,7 @@ public class Translator extends SPLBaseVisitor<String> {
                 visitAtom(ctx.atom());
             }else{
                 SymbolEntry symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), getIntermediateCode(), null);
-                intermediateCode.append(symbol.getTempVariable() + "\n");
+                intermediateCode.append(symbol.getRenamedVariable() + "\n");
             }
             
         }
@@ -170,19 +164,29 @@ public class Translator extends SPLBaseVisitor<String> {
     // ASSIGN ::= VAR=TERM|| VAR=NAME(INPUT)
     public String visitAssign(SPLParser.AssignContext ctx)
     {
-
-        tempVariable.newTemp();
+        if (ctx.term()!= null)
+        {
             SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), null);
+            /*tempVariable.newTemp();
             symbolTable.updateVariable(symbol.getName(), symbol.getScopeOwner(), symbol.getScope(),tempVariable.printTemp() );
-            
-            String varCode = tempVariable.printTemp() + " = " + symbol.getRenamedVariable();
+            String t = tempVariable.printTemp();*/
+
             label.newLabel();
             String l1 = label.printLabel();
             label.newLabel();
             String l2 = label.printLabel();
-            visitTerm(ctx.term(), l1, l2);
+
+            String t1 =visitTerm(ctx.term(), l1, l2);
+
+            String varCode = symbol.getRenamedVariable() + " = " + t1;
             intermediateCode.append(varCode);
             intermediateCode.append("\n");
+
+        }else{
+
+            // under construction
+
+        }
 
         return null;
     }
@@ -260,6 +264,7 @@ public class Translator extends SPLBaseVisitor<String> {
             tempVariable.newTemp();
             String t2 = tempVariable.printTemp();
             intermediateCode.append(t2 + " = " + unopCode + t1 + "\n");
+            return t2;
 
         }else{
             String t1 = visitTerm(ctx.term(0),l1,l2);
@@ -279,9 +284,8 @@ public class Translator extends SPLBaseVisitor<String> {
             tempVariable.newTemp();
             String t3 = tempVariable.printTemp();
             intermediateCode.append(t3 + " = " + t1 + binopCode + t2 + "\n");
+            return t3;
         }
-
-        return null;
     }
 
    
