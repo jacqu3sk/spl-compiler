@@ -56,6 +56,10 @@ public class SymbolEntry {
     public int getNodeId() {
         return nodeId;
     }
+
+    public String getRenamedVariable() {
+        return "v_" + nodeId;
+    }
     
     public void setNodeId(int newId) {
         nodeId = newId;
