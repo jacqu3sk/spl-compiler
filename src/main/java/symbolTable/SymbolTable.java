@@ -161,6 +161,41 @@ public class SymbolTable {
         
         return null; // Not found
     }
+
+    /**
+     * Lookup a variable in the appropriate scope chain
+     * @param name Variable name to look up
+     * @param currentScope Current procedure/function name (null if in main/global)
+     * @param scopeType Current scope type
+     * @return SymbolEntry if found, null otherwise
+     */
+    public void updateVariable(String name, String currentScope, 
+                                     ScopeType scopeType, String tempVar) {
+        // First, check local scope if applicable (for PROCEDURE/FUNCTION local scopes)
+        if (scopeType == ScopeType.LOCAL && currentScope != null) {
+            Map<String, SymbolEntry> localScope = localScopes.get(currentScope);
+            if (localScope != null && localScope.containsKey(name)) {
+                localScope.get(name).setTempVariable(tempVar);
+                 System.out.println("HIIII1");
+            }
+        }
+        
+        // Then check main scope if applicable
+        if (scopeType == ScopeType.MAIN) {
+            if (mainVariables.containsKey(name)) {
+                mainVariables.get(name).setTempVariable(tempVar);
+                 System.out.println("HIIII2");
+            }
+        }
+        
+        // Finally, check global scope (accessible from everywhere)
+        if (globalVariables.containsKey(name)) {
+            globalVariables.get(name).setTempVariable(tempVar);
+             System.out.println("HIIII3");
+        }
+        
+        System.out.println("HIIII");
+    }
     
     /**
      * Check if a procedure exists

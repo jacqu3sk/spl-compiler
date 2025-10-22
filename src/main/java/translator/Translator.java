@@ -79,6 +79,8 @@ public class Translator extends SPLBaseVisitor<String> {
             String code = tempVariable.printTemp() + " = " + symbol.getRenamedVariable();
             intermediateCode.append(code);
             intermediateCode.append("\n");
+           
+            symbolTable.updateVariable(symbol.getName(), symbol.getScopeOwner(), symbol.getScope(),tempVariable.printTemp() );
             return tempVariable.printTemp();
 
         }
@@ -109,6 +111,8 @@ public class Translator extends SPLBaseVisitor<String> {
         }else if (ctx.assign()!=null) {
             tempVariable.newTemp();
             SymbolEntry symbol = symbolTable.lookupVariable(ctx.assign().var().getText(), getIntermediateCode(), null);
+            symbolTable.updateVariable(symbol.getName(), symbol.getScopeOwner(), symbol.getScope(),tempVariable.printTemp() );
+            
             String varCode = tempVariable.printTemp() + " = " + symbol.getRenamedVariable();
             label.newLabel();
             String l1 = label.printLabel();
@@ -143,8 +147,8 @@ public class Translator extends SPLBaseVisitor<String> {
             {
                 visitAtom(ctx.atom());
             }else{
-                SymbolEntry internal_variable = symbolTable.lookupVariable(ctx.atom().var().getText(), getIntermediateCode(), null);
-                intermediateCode.append(internal_variable.getRenamedVariable() + "\n");
+                SymbolEntry symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), getIntermediateCode(), null);
+                intermediateCode.append(symbol.getTempVariable() + "\n");
             }
             
         }
