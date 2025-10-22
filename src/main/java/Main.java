@@ -158,9 +158,14 @@ public class Main {
                     a
                     b
                 }
-                x = (10 plus 5);
+                x = 10;
                 print x;
-                y = gx(10);
+                a = 2;
+                if ((x eq 10) or (a eq 2)) {
+                    y = gx(10)
+                }else{
+                    y = gx(20)
+                };
                 halt
             }
             """;

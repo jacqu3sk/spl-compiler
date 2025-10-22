@@ -254,12 +254,12 @@ public class Translator extends SPLBaseVisitor<String> {
         String l1 = label.printLabel();
         label.newLabel();
         String l2 = label.printLabel();
-        label.newLabel();
-        String l3 = label.printLabel();
         
         String condition = visitTerm(ctx.term(),l1,l2);
         if (condition.contains(","))
         {
+            label.newLabel();
+            String l3 = label.printLabel();
             String[] conditions = condition.split(",");
 
             intermediateCode.append("IF " + conditions[0] + " THEN " + l1 + "\n");
@@ -272,7 +272,7 @@ public class Translator extends SPLBaseVisitor<String> {
                     visitAlgo(ctx.algo(1));
                 }
             }
-            intermediateCode.append("GOTO "+l2+"\n");
+            intermediateCode.append("GOTO "+l3+"\n");
             intermediateCode.append("REM "+l1+"\n");
             intermediateCode.append("IF " + conditions[1] + " THEN " + l2 + "\n");
             if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
@@ -285,8 +285,9 @@ public class Translator extends SPLBaseVisitor<String> {
                 }
             }
             intermediateCode.append("GOTO "+l2+"\n");
-
-            /*if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
+            
+            intermediateCode.append("REM "+l2+"\n");
+            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
             {
                 if (ctx.algo(1)!=null)
                 {
@@ -294,7 +295,31 @@ public class Translator extends SPLBaseVisitor<String> {
                 }
             }else{
                 visitAlgo(ctx.algo(0));
-            }*/
+            }
+
+            intermediateCode.append("REM "+l3+"\n");
+
+        }else if (condition.contains("#"))
+        {
+            label.newLabel();
+            String l3 = label.printLabel();
+            String[] conditions = condition.split("#");
+
+            intermediateCode.append("IF " + conditions[0] + " THEN " + l2 + "\n");
+            intermediateCode.append("GOTO "+l1+"\n");
+            
+            intermediateCode.append("REM "+l1+"\n");
+            intermediateCode.append("IF " + conditions[1] + " THEN " + l2 + "\n");
+            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
+            {
+                visitAlgo(ctx.algo(0));
+            }else{
+                if (ctx.algo(1)!=null)
+                {
+                    visitAlgo(ctx.algo(1));
+                }
+            }
+            intermediateCode.append("GOTO "+l3+"\n");
             
             intermediateCode.append("REM "+l2+"\n");
             if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
@@ -417,7 +442,7 @@ public class Translator extends SPLBaseVisitor<String> {
                 case "and":
                     return t1 + ',' + t2 ;
                 case "or":
-                
+                    return t1 + '#' + t2 ;
             }
             tempVariable.newTemp();
             String t3 = tempVariable.printTemp();

@@ -10,12 +10,8 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.jupiter.api.Test;
-import parser.SyntaxErrorListener;
-import symbolTable.ScopeType;
 import symbolTable.SPLSemanticAnalyzer;
-import symbolTable.SymbolEntry;
 import symbolTable.SymbolTable;
-import symbolTable.SymbolType;
 import translator.Translator;
 import typeChecker.ConsoleTypeErrorListener;
 import typeChecker.TypeChecker;
@@ -95,7 +91,7 @@ public class CodeGenerationTest {
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
         TypeChecker typeChecker = new TypeChecker(typeErrorListener);
-        Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
+        typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
@@ -182,7 +178,7 @@ STOP
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
         TypeChecker typeChecker = new TypeChecker(typeErrorListener);
-        Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
+        typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
@@ -271,7 +267,7 @@ STOP
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
         TypeChecker typeChecker = new TypeChecker(typeErrorListener);
-        Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
+        typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
@@ -363,7 +359,7 @@ STOP
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
         TypeChecker typeChecker = new TypeChecker(typeErrorListener);
-        Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
+        typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
@@ -461,7 +457,7 @@ STOP
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
         TypeChecker typeChecker = new TypeChecker(typeErrorListener);
-        Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
+        typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
@@ -562,7 +558,7 @@ STOP
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
         TypeChecker typeChecker = new TypeChecker(typeErrorListener);
-        Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
+        typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
@@ -664,7 +660,7 @@ STOP
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
         TypeChecker typeChecker = new TypeChecker(typeErrorListener);
-        Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
+        typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
@@ -683,7 +679,7 @@ IF t3=t4 THEN L1
 t8 = 20
 t7 = CALL gx(t8)
 v2 = t8
-GOTO L2
+GOTO L3
 REM L1
 IF t5=t6 THEN L2
 t10 = 20
@@ -694,6 +690,115 @@ REM L2
 t12 = 10
 t11 = CALL gx(t12)
 v2 = t12
+REM L3
+STOP
+""";
+        assertEquals(expected_code, translator.getIntermediateCode());
+    }
+
+    @Test
+    void CodeGeneration_BinopOr_Success() {
+        String exampleProgram =  """
+            glob {
+                x
+                y
+            }
+            proc {
+                hx() {
+                    local{}
+                    halt
+                }
+            }
+            func {
+                gx(value) {
+                    local{}
+                    halt;
+                    return value
+                }
+            }
+            main {
+                var {
+                    a
+                    b
+                }
+                x = 10;
+                print x;
+                a = 2;
+                if ((x eq 10) or (a eq 2)) {
+                    y = gx(10)
+                }else{
+                    y = gx(20)
+                };
+                halt
+            }
+            """;
+
+        CharStream input = CharStreams.fromString(exampleProgram);
+       
+        SPLLexer lexer = new SPLLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        
+        // Step 2: Syntax Analysis (Parsing)
+        SPLParser parser = new SPLParser(tokens);
+        
+        // Error handling for parser
+        parser.removeErrorListeners();
+        parser.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer,
+                                  Object offendingSymbol,
+                                  int line, int charPositionInLine,
+                                  String msg,
+                                  RecognitionException e) {
+            }
+        });
+        
+        ParseTree tree = parser.spl_prog();
+        
+        // Check if parsing was successful
+        if (parser.getNumberOfSyntaxErrors() > 0) {
+            return;
+        }
+        
+        // Step 3: Semantic Analysis
+        ParseTreeWalker walker = new ParseTreeWalker();
+        SPLSemanticAnalyzer analyzer = new SPLSemanticAnalyzer();
+        
+        // Walk the parse tree
+        walker.walk(analyzer, tree);
+        
+        // Get results
+        SymbolTable symbolTable = analyzer.getSymbolTable();
+
+        TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
+        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        typeChecker.visit((SPLParser.Spl_progContext) tree);
+
+        Translator translator = new Translator(symbolTable,tree);
+        translator.generateIntermediateCode();
+
+        String expected_code = """
+t1 = 10
+v1 = t1
+PRINT v1
+t2 = 2
+v7 = t2
+t3 = v1
+t4 = 10
+t5 = v7
+t6 = 2
+IF t3=t4 THEN L2
+GOTO L1
+REM L1
+IF t5=t6 THEN L2
+t8 = 20
+t7 = CALL gx(t8)
+v2 = t8
+GOTO L3
+REM L2
+t10 = 10
+t9 = CALL gx(t10)
+v2 = t10
 REM L3
 STOP
 """;
