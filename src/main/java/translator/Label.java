@@ -8,6 +8,7 @@ public class Label {
 
     public Label() 
     {
+        counter = 0;
         labelNumber = counter;
     }
 

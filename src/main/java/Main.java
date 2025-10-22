@@ -126,6 +126,7 @@ public class Main {
 
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
+        translator.printIntermediateCode();
     }
     
     /**
@@ -159,6 +160,7 @@ public class Main {
                 }
                 x = (10 plus 5);
                 print x;
+                y = gx(10);
                 halt
             }
             """;

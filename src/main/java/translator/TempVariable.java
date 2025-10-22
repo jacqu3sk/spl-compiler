@@ -8,6 +8,7 @@ public class TempVariable {
 
     public TempVariable () 
     {
+        counter = 0;
         tempNumber = counter;
     }
 

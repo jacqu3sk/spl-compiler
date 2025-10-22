@@ -37,7 +37,11 @@ public class Translator extends SPLBaseVisitor<String> {
     public void generateIntermediateCode()
     {
         visit(tree);
+    }
 
+    // Print intermediate code
+    public void printIntermediateCode()
+    {
         System.out.println("\nGenerated Intermediate Code:");
         System.out.println(intermediateCode);
     }
@@ -116,7 +120,6 @@ public class Translator extends SPLBaseVisitor<String> {
 
         }else { //  NAME(INPUT)
 
-            
             String code = "CALL ";
             System.out.println(ctx.NAME().getText());
             SymbolEntry function = symbolTable.lookupFunction(ctx.NAME().getText(), null, null);
@@ -136,7 +139,7 @@ public class Translator extends SPLBaseVisitor<String> {
                 }
             }
 
-            intermediateCode.append(code + ") \n");
+            intermediateCode.append(code + ")\n");
         }
         return null;
     }
@@ -184,8 +187,33 @@ public class Translator extends SPLBaseVisitor<String> {
 
         }else{
 
-            // under construction
+            tempVariable.newTemp();
+            String code = tempVariable.printTemp() + " = CALL ";
+            System.out.println(ctx.NAME().getText());
+            SymbolEntry function = symbolTable.lookupFunction(ctx.NAME().getText(), null, null);
+            code += function.getName() + '(';
+            String t1="";
+            for (int i=0; i<ctx.input().atom().size();i++)
+            {
+                t1 = visitAtom(ctx.input().atom(i));
+                if (i>0){
+                    code += ", ";
+                }
+                SymbolEntry symbol = symbolTable.lookupVariable(ctx.input().atom(i).getText(), getIntermediateCode(), null);
+                if (symbol!=null)
+                {
+                    code +=symbol.getTempVariable();
+                }else{
+                    code += t1;
+                }
+            }
 
+            intermediateCode.append(code + ")\n");
+
+            SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), null);
+            String varCode = symbol.getRenamedVariable() + " = " + t1;
+            intermediateCode.append(varCode);
+            intermediateCode.append("\n");
         }
 
         return null;
