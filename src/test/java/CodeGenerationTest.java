@@ -805,4 +805,206 @@ STOP
         assertEquals(expected_code, translator.getIntermediateCode());
     }
 
+    @Test
+    void CodeGeneration_WhileLoop_Success() {
+        String exampleProgram =  """
+            glob {
+                x
+                y
+            }
+            proc {
+                hx() {
+                    local{}
+                    halt
+                }
+            }
+            func {
+                gx(value) {
+                    local{}
+                    halt;
+                    return value
+                }
+            }
+             main {
+                var {
+                    a
+                    b
+                }
+                x = 5;
+                print x;
+                a = 10;
+                while (a > 5) {
+                    a = (a minus 1)
+                };
+                halt
+            }
+            """;
+
+        CharStream input = CharStreams.fromString(exampleProgram);
+       
+        SPLLexer lexer = new SPLLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        
+        // Step 2: Syntax Analysis (Parsing)
+        SPLParser parser = new SPLParser(tokens);
+        
+        // Error handling for parser
+        parser.removeErrorListeners();
+        parser.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer,
+                                  Object offendingSymbol,
+                                  int line, int charPositionInLine,
+                                  String msg,
+                                  RecognitionException e) {
+            }
+        });
+        
+        ParseTree tree = parser.spl_prog();
+        
+        // Check if parsing was successful
+        if (parser.getNumberOfSyntaxErrors() > 0) {
+            return;
+        }
+        
+        // Step 3: Semantic Analysis
+        ParseTreeWalker walker = new ParseTreeWalker();
+        SPLSemanticAnalyzer analyzer = new SPLSemanticAnalyzer();
+        
+        // Walk the parse tree
+        walker.walk(analyzer, tree);
+        
+        // Get results
+        SymbolTable symbolTable = analyzer.getSymbolTable();
+
+        TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
+        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        typeChecker.visit((SPLParser.Spl_progContext) tree);
+
+        Translator translator = new Translator(symbolTable,tree);
+        translator.generateIntermediateCode();
+
+        String expected_code = """
+t1 = 5
+v1 = t1
+PRINT v1
+t2 = 10
+v7 = t2
+REM L1
+t3 = v7
+t4 = 5
+IF t3>t4 THEN L2
+GOTO L3
+REM L2
+t5 = v7
+t6 = 1
+t7 = t5-t6
+v7 = t7
+GOTO L1
+REM L3
+STOP
+""";
+        assertEquals(expected_code, translator.getIntermediateCode());
+    }
+
+    @Test
+    void CodeGeneration_DoUntilLoop_Success() {
+        String exampleProgram =  """
+            glob {
+                x
+                y
+            }
+            proc {
+                hx() {
+                    local{}
+                    halt
+                }
+            }
+            func {
+                gx(value) {
+                    local{}
+                    halt;
+                    return value
+                }
+            }
+            main {
+                var {
+                    a
+                    b
+                }
+                x = 5;
+                print x;
+                a = 10;
+                do {
+                    a = (a minus 1)
+                } until ( a eq 0);
+                halt
+            }
+            """;
+
+        CharStream input = CharStreams.fromString(exampleProgram);
+       
+        SPLLexer lexer = new SPLLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        
+        // Step 2: Syntax Analysis (Parsing)
+        SPLParser parser = new SPLParser(tokens);
+        
+        // Error handling for parser
+        parser.removeErrorListeners();
+        parser.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer,
+                                  Object offendingSymbol,
+                                  int line, int charPositionInLine,
+                                  String msg,
+                                  RecognitionException e) {
+            }
+        });
+        
+        ParseTree tree = parser.spl_prog();
+        
+        // Check if parsing was successful
+        if (parser.getNumberOfSyntaxErrors() > 0) {
+            return;
+        }
+        
+        // Step 3: Semantic Analysis
+        ParseTreeWalker walker = new ParseTreeWalker();
+        SPLSemanticAnalyzer analyzer = new SPLSemanticAnalyzer();
+        
+        // Walk the parse tree
+        walker.walk(analyzer, tree);
+        
+        // Get results
+        SymbolTable symbolTable = analyzer.getSymbolTable();
+
+        TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
+        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        typeChecker.visit((SPLParser.Spl_progContext) tree);
+
+        Translator translator = new Translator(symbolTable,tree);
+        translator.generateIntermediateCode();
+
+        String expected_code = """
+t1 = 5
+v1 = t1
+PRINT v1
+t2 = 10
+v7 = t2
+REM L1
+t3 = v7
+t4 = 1
+t5 = t3-t4
+v7 = t5
+t6 = v7
+t7 = 0
+IF t6=t7 THEN L2
+GOTO L1
+REM L2
+STOP
+""";
+        assertEquals(expected_code, translator.getIntermediateCode());
+    }
+
 }

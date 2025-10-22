@@ -374,21 +374,25 @@ public class Translator extends SPLBaseVisitor<String> {
             label.newLabel();
             String l3 = label.printLabel();
 
-            intermediateCode.append("REM " + l1);
-            visitTerm(ctx.term(), l2,l3);
-            intermediateCode.append("REM " + l2);
+            intermediateCode.append("REM " + l1 + "\n");
+            String t1 = visitTerm(ctx.term(), l2,l3);
+            intermediateCode.append("IF " + t1 + " THEN " +l2 + "\n");
+            intermediateCode.append("GOTO " + l3 + "\n");
+            intermediateCode.append("REM " + l2 + "\n");
             visitAlgo(ctx.algo());
-            intermediateCode.append(" GOTO " + l1 + "REM " + l3);
+            intermediateCode.append("GOTO " + l1 + "\n" + "REM " + l3+ "\n");
         }else{
             label.newLabel();
             String l1 = label.printLabel();
             label.newLabel();
             String l2 = label.printLabel();
 
-            intermediateCode.append("REM " + l1);
+            intermediateCode.append("REM " + l1 + "\n");
             visitAlgo(ctx.algo());
-            visitTerm(ctx.term(), l2,l1);
-            intermediateCode.append("REM " + l2);
+            String t1 = visitTerm(ctx.term(), l2,l1);
+            intermediateCode.append("IF " + t1 + " THEN " +l2 + "\n");
+            intermediateCode.append("GOTO " + l1 + "\n");
+            intermediateCode.append("REM " + l2 + "\n");
         }
 
         return null;
@@ -437,7 +441,7 @@ public class Translator extends SPLBaseVisitor<String> {
 
             switch (binopCode)
             {
-                case "=":
+                case "=",">":
                     return t1 + binopCode + t2 ;
                 case "and":
                     return t1 + ',' + t2 ;
