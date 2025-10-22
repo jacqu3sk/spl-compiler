@@ -3,6 +3,9 @@ package translator;
  * visitlates source code to intermediate code
  */
 
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.processing.Generated;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -10,7 +13,7 @@ import org.antlr.v4.runtime.tree.*;
 
 import generated.SPLBaseVisitor;
 import generated.SPLParser;
-
+import generated.SPLParser.AtomContext;
 import symbolTable.*;
 
 public class Translator extends SPLBaseVisitor<String> {
@@ -98,7 +101,7 @@ public class Translator extends SPLBaseVisitor<String> {
         return null;
     }
 
-    // INSTR ::= halt || print OUTPUT || ASSIGN || BRANCH || LOOP || NAME
+    // INSTR ::= halt || print OUTPUT || ASSIGN || BRANCH || LOOP || NAME(INPUT)
     public String visitInstr(SPLParser.InstrContext ctx) {
         if (ctx.getText().startsWith("halt")) {
             intermediateCode.append("STOP\n");
@@ -109,18 +112,7 @@ public class Translator extends SPLBaseVisitor<String> {
             
 
         }else if (ctx.assign()!=null) {
-            tempVariable.newTemp();
-            SymbolEntry symbol = symbolTable.lookupVariable(ctx.assign().var().getText(), getIntermediateCode(), null);
-            symbolTable.updateVariable(symbol.getName(), symbol.getScopeOwner(), symbol.getScope(),tempVariable.printTemp() );
-            
-            String varCode = tempVariable.printTemp() + " = " + symbol.getRenamedVariable();
-            label.newLabel();
-            String l1 = label.printLabel();
-            label.newLabel();
-            String l2 = label.printLabel();
-            visitTerm(ctx.assign().term(), l1, l2);
-            intermediateCode.append(varCode);
-            intermediateCode.append("\n");
+           visitAssign(ctx.assign());
 
         }else if (ctx.branch() !=null) {
             visitBranch(ctx.branch());
@@ -128,9 +120,29 @@ public class Translator extends SPLBaseVisitor<String> {
         }else if (ctx.loop()!=null) {
             visitLoop(ctx.loop());
 
-        }else {
-            //NAME(INPUT)
-            // need to implement visitASSIGN
+        }else { //  NAME(INPUT)
+
+            
+            String code = "CALL ";
+            System.out.println(ctx.NAME().getText());
+            SymbolEntry function = symbolTable.lookupFunction(ctx.NAME().getText(), null, null);
+            code += function.getName() + '(';
+            for (int i=0; i<ctx.input().atom().size();i++)
+            {
+                String var = visitAtom(ctx.input().atom(i));
+                if (i>0){
+                    code += ", ";
+                }
+                SymbolEntry symbol = symbolTable.lookupVariable(ctx.input().atom(i).getText(), getIntermediateCode(), null);
+                if (symbol!=null)
+                {
+                    code +=symbol.getTempVariable();
+                }else{
+                    code += var;
+                }
+            }
+
+            intermediateCode.append(code + ") \n");
         }
         return null;
     }
@@ -152,6 +164,26 @@ public class Translator extends SPLBaseVisitor<String> {
             }
             
         }
+        return null;
+    }
+
+    // ASSIGN ::= VAR=TERM|| VAR=NAME(INPUT)
+    public String visitAssign(SPLParser.AssignContext ctx)
+    {
+
+        tempVariable.newTemp();
+            SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), null);
+            symbolTable.updateVariable(symbol.getName(), symbol.getScopeOwner(), symbol.getScope(),tempVariable.printTemp() );
+            
+            String varCode = tempVariable.printTemp() + " = " + symbol.getRenamedVariable();
+            label.newLabel();
+            String l1 = label.printLabel();
+            label.newLabel();
+            String l2 = label.printLabel();
+            visitTerm(ctx.term(), l1, l2);
+            intermediateCode.append(varCode);
+            intermediateCode.append("\n");
+
         return null;
     }
 
@@ -251,6 +283,8 @@ public class Translator extends SPLBaseVisitor<String> {
 
         return null;
     }
+
+   
 
     public String visitUnop(SPLParser.UnopContext ctx)
     {

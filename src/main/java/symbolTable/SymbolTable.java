@@ -169,6 +169,24 @@ public class SymbolTable {
      * @param scopeType Current scope type
      * @return SymbolEntry if found, null otherwise
      */
+    public SymbolEntry lookupFunction(String name, String currentScope, 
+                                     ScopeType scopeType) {
+        
+        // Finally, check global scope (accessible from everywhere)
+        if (functions.containsKey(name)) {
+            return functions.get(name);
+        }
+        
+        return null; // Not found
+    }
+
+    /**
+     * Update a variable in the appropriate scope chain
+     * @param name Variable name to look up
+     * @param currentScope Current procedure/function name (null if in main/global)
+     * @param scopeType Current scope type
+     * @return SymbolEntry if found, null otherwise
+     */
     public void updateVariable(String name, String currentScope, 
                                      ScopeType scopeType, String tempVar) {
         // First, check local scope if applicable (for PROCEDURE/FUNCTION local scopes)
@@ -176,7 +194,6 @@ public class SymbolTable {
             Map<String, SymbolEntry> localScope = localScopes.get(currentScope);
             if (localScope != null && localScope.containsKey(name)) {
                 localScope.get(name).setTempVariable(tempVar);
-                 System.out.println("HIIII1");
             }
         }
         
@@ -184,17 +201,13 @@ public class SymbolTable {
         if (scopeType == ScopeType.MAIN) {
             if (mainVariables.containsKey(name)) {
                 mainVariables.get(name).setTempVariable(tempVar);
-                 System.out.println("HIIII2");
             }
         }
         
         // Finally, check global scope (accessible from everywhere)
         if (globalVariables.containsKey(name)) {
             globalVariables.get(name).setTempVariable(tempVar);
-             System.out.println("HIIII3");
         }
-        
-        System.out.println("HIIII");
     }
     
     /**
