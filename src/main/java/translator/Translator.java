@@ -121,7 +121,6 @@ public class Translator extends SPLBaseVisitor<String> {
         }else { //  NAME(INPUT)
 
             String code = "CALL ";
-            System.out.println(ctx.NAME().getText());
             SymbolEntry function = symbolTable.lookupFunction(ctx.NAME().getText(), null, null);
             code += function.getName() + '(';
             for (int i=0; i<ctx.input().atom().size();i++)
@@ -189,7 +188,6 @@ public class Translator extends SPLBaseVisitor<String> {
 
             tempVariable.newTemp();
             String code = tempVariable.printTemp() + " = CALL ";
-            System.out.println(ctx.NAME().getText());
             SymbolEntry function = symbolTable.lookupFunction(ctx.NAME().getText(), null, null);
             code += function.getName() + '(';
             String t1="";
@@ -228,13 +226,27 @@ public class Translator extends SPLBaseVisitor<String> {
         
         String condition = visitTerm(ctx.term(),l1,l2);
         intermediateCode.append("IF " + condition + " THEN " + l1 + "\n");
-        if (ctx.algo(1)!=null)
+        if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
         {
-            visitAlgo(ctx.algo(1));
+            visitAlgo(ctx.algo(0));
+        }else{
+            if (ctx.algo(1)!=null)
+            {
+                visitAlgo(ctx.algo(1));
+            }
         }
         intermediateCode.append("GOTO "+l2+"\n");
         intermediateCode.append("REM "+l1+"\n");
-        visitAlgo(ctx.algo(0));
+        if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
+        {
+            if (ctx.algo(1)!=null)
+            {
+                visitAlgo(ctx.algo(1));
+            }
+        }else{
+            visitAlgo(ctx.algo(0));
+        }
+        
         intermediateCode.append("REM "+l2+"\n");
 
         return null;
@@ -282,6 +294,12 @@ public class Translator extends SPLBaseVisitor<String> {
         } else if (ctx.unop()!=null) {
             String unopCode = visitUnop(ctx.unop());
 
+            if (unopCode.equals("not"))
+            {
+                String term = visitTerm(ctx.term(0),l1,l2);
+                return term;
+            }
+
             tempVariable.newTemp();
             String t1 = tempVariable.printTemp();
             visitTerm(ctx.term(0),l1,l2);
@@ -323,9 +341,11 @@ public class Translator extends SPLBaseVisitor<String> {
     {
         if (ctx.getText().equals("neg")) {
             return "-";
-        }else {
-            return "";
+        }else if (ctx.getText().equals("not")){
+            return "not";
         }
+
+        return null;
     }
 
     public String visitBinop(SPLParser.BinopContext ctx)
