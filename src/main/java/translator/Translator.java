@@ -76,7 +76,15 @@ public class Translator extends SPLBaseVisitor<String> {
             intermediateCode.append("\n");
             return tempVariable.printTemp();
         }else{
-            SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), null);
+            SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), ScopeType.MAIN);
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), ScopeType.LOCAL);
+            }
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), null);
+            }
             tempVariable.newTemp();
             String code = tempVariable.printTemp() + " = " + symbol.getRenamedVariable();
             intermediateCode.append(code);
@@ -129,7 +137,15 @@ public class Translator extends SPLBaseVisitor<String> {
                 if (i>0){
                     code += ", ";
                 }
-                SymbolEntry symbol = symbolTable.lookupVariable(ctx.input().atom(i).getText(), getIntermediateCode(), null);
+                SymbolEntry symbol = symbolTable.lookupVariable(ctx.input().atom(i).getText(), getIntermediateCode(), ScopeType.MAIN);
+                if (symbol==null)
+                {
+                    symbol = symbolTable.lookupVariable(ctx.input().atom(i).getText(), getIntermediateCode(), ScopeType.LOCAL);
+                }
+                if (symbol==null)
+                {
+                    symbol = symbolTable.lookupVariable(ctx.input().atom(i).getText(), getIntermediateCode(), null);
+                }
                 if (symbol!=null)
                 {
                     code +=symbol.getTempVariable();
@@ -155,7 +171,15 @@ public class Translator extends SPLBaseVisitor<String> {
             {
                 visitAtom(ctx.atom());
             }else{
-                SymbolEntry symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), getIntermediateCode(), null);
+                SymbolEntry symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), getIntermediateCode(), ScopeType.MAIN);
+                if (symbol==null)
+                {
+                    symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), getIntermediateCode(), ScopeType.LOCAL);
+                }
+                if (symbol==null)
+                {
+                    symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), getIntermediateCode(), null);
+                }
                 intermediateCode.append(symbol.getRenamedVariable() + "\n");
             }
             
@@ -168,17 +192,16 @@ public class Translator extends SPLBaseVisitor<String> {
     {
         if (ctx.term()!= null)
         {
-            SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), null);
-            /*tempVariable.newTemp();
-            symbolTable.updateVariable(symbol.getName(), symbol.getScopeOwner(), symbol.getScope(),tempVariable.printTemp() );
-            String t = tempVariable.printTemp();*/
-
-           /*  label.newLabel();
-            String l1 = label.printLabel();
-            label.newLabel();
-            String l2 = label.printLabel();*/
-
-            String t1 =visitTerm(ctx.term(), null, null);
+            SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), ScopeType.MAIN);
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), ScopeType.LOCAL);
+            }
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), null);
+            }
+            String t1 = visitTerm(ctx.term(), null, null);
 
             String varCode = symbol.getRenamedVariable() + " = " + t1;
             intermediateCode.append(varCode);
@@ -197,7 +220,15 @@ public class Translator extends SPLBaseVisitor<String> {
                 if (i>0){
                     code += ", ";
                 }
-                SymbolEntry symbol = symbolTable.lookupVariable(ctx.input().atom(i).getText(), getIntermediateCode(), null);
+                SymbolEntry symbol = symbolTable.lookupVariable(ctx.input().atom(i).getText(), getIntermediateCode(), ScopeType.MAIN);
+                if (symbol==null)
+                {
+                    symbol = symbolTable.lookupVariable(ctx.input().atom(i).getText(), getIntermediateCode(), ScopeType.LOCAL);
+                }
+                if (symbol==null)
+                {
+                    symbol = symbolTable.lookupVariable(ctx.input().atom(i).getText(), getIntermediateCode(), null);
+                }
                 if (symbol!=null)
                 {
                     code +=symbol.getTempVariable();
@@ -223,31 +254,86 @@ public class Translator extends SPLBaseVisitor<String> {
         String l1 = label.printLabel();
         label.newLabel();
         String l2 = label.printLabel();
+        label.newLabel();
+        String l3 = label.printLabel();
         
         String condition = visitTerm(ctx.term(),l1,l2);
-        intermediateCode.append("IF " + condition + " THEN " + l1 + "\n");
-        if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
+        if (condition.contains(","))
         {
-            visitAlgo(ctx.algo(0));
-        }else{
-            if (ctx.algo(1)!=null)
+            String[] conditions = condition.split(",");
+
+            intermediateCode.append("IF " + conditions[0] + " THEN " + l1 + "\n");
+            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
             {
-                visitAlgo(ctx.algo(1));
+                visitAlgo(ctx.algo(0));
+            }else{
+                if (ctx.algo(1)!=null)
+                {
+                    visitAlgo(ctx.algo(1));
+                }
             }
-        }
-        intermediateCode.append("GOTO "+l2+"\n");
-        intermediateCode.append("REM "+l1+"\n");
-        if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
-        {
-            if (ctx.algo(1)!=null)
+            intermediateCode.append("GOTO "+l2+"\n");
+            intermediateCode.append("REM "+l1+"\n");
+            intermediateCode.append("IF " + conditions[1] + " THEN " + l2 + "\n");
+            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
             {
-                visitAlgo(ctx.algo(1));
+                visitAlgo(ctx.algo(0));
+            }else{
+                if (ctx.algo(1)!=null)
+                {
+                    visitAlgo(ctx.algo(1));
+                }
             }
+            intermediateCode.append("GOTO "+l2+"\n");
+
+            /*if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
+            {
+                if (ctx.algo(1)!=null)
+                {
+                    visitAlgo(ctx.algo(1));
+                }
+            }else{
+                visitAlgo(ctx.algo(0));
+            }*/
+            
+            intermediateCode.append("REM "+l2+"\n");
+            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
+            {
+                if (ctx.algo(1)!=null)
+                {
+                    visitAlgo(ctx.algo(1));
+                }
+            }else{
+                visitAlgo(ctx.algo(0));
+            }
+
+            intermediateCode.append("REM "+l3+"\n");
+
         }else{
-            visitAlgo(ctx.algo(0));
+            intermediateCode.append("IF " + condition + " THEN " + l1 + "\n");
+            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
+            {
+                visitAlgo(ctx.algo(0));
+            }else{
+                if (ctx.algo(1)!=null)
+                {
+                    visitAlgo(ctx.algo(1));
+                }
+            }
+            intermediateCode.append("GOTO "+l2+"\n");
+            intermediateCode.append("REM "+l1+"\n");
+            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
+            {
+                if (ctx.algo(1)!=null)
+                {
+                    visitAlgo(ctx.algo(1));
+                }
+            }else{
+                visitAlgo(ctx.algo(0));
+            }
+            
+            intermediateCode.append("REM "+l2+"\n");
         }
-        
-        intermediateCode.append("REM "+l2+"\n");
 
         return null;
     }
@@ -324,9 +410,14 @@ public class Translator extends SPLBaseVisitor<String> {
                 t2 = tempVariable.printTemp();
             }
 
-            if (binopCode.equals("="))
+            switch (binopCode)
             {
-                return t1 + binopCode + t2 ;
+                case "=":
+                    return t1 + binopCode + t2 ;
+                case "and":
+                    return t1 + ',' + t2 ;
+                case "or":
+                
             }
             tempVariable.newTemp();
             String t3 = tempVariable.printTemp();
@@ -350,18 +441,21 @@ public class Translator extends SPLBaseVisitor<String> {
 
     public String visitBinop(SPLParser.BinopContext ctx)
     {
-        if (ctx.getText().equals("eq")) {
-            return "=";
-        }else if (ctx.getText().equals("plus")) {
-            return "+";
-        }else if (ctx.getText().equals("minus")) {
-            return "-";
-        }else if (ctx.getText().equals("mult")) {
-            return "*";
-        }else if (ctx.getText().equals("div")) {
-            return "/";
-        }else{
-            return ctx.getText();
+        switch (ctx.getText())
+        {
+            case "eq":
+                 return "=";
+            case "plus":
+                 return "+";
+            case "minus":
+                 return "-";
+            case "mult":
+                 return "*";
+            case "div":
+                 return "/";
+            default:
+                return ctx.getText();
         }
+        
     }
 }
