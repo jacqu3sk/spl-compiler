@@ -4,6 +4,8 @@ package translator;
  */
 
 
+import java.util.HashMap;
+
 import org.antlr.v4.runtime.tree.*;
 
 import generated.SPLBaseVisitor;
@@ -17,6 +19,8 @@ public class Translator extends SPLBaseVisitor<String> {
     private TempVariable tempVariable;
     private final SymbolTable symbolTable;
     private final ParseTree tree;
+    private HashMap<String, SPLParser.BodyContext> funcMap ;
+    private HashMap<String, String> procMap ;
 
     // constructor
     public Translator(SymbolTable symbolTable, ParseTree tree) {
@@ -25,6 +29,8 @@ public class Translator extends SPLBaseVisitor<String> {
         tempVariable = new TempVariable();
         this.symbolTable = symbolTable;
         this.tree = tree;
+        funcMap = new HashMap<>();
+        procMap = new HashMap<>();
     }
 
     // getter
@@ -56,8 +62,45 @@ public class Translator extends SPLBaseVisitor<String> {
                     visit(ch);
                     break;
                 }
+                if (ch instanceof SPLParser.FuncdefsContext) {
+                    visit(ch);
+                    //break;
+                }
             }
         }
+        return null;
+    }
+
+    // FUNCDEFS ::= FDEF FUNCDEFS || NULL
+    public String visitFuncdefs(SPLParser.FuncdefsContext ctx)
+    {
+        if (ctx.fdef() !=null)
+        {
+            visitFdef(ctx.fdef());
+        }
+        if (ctx.funcdefs()!=null)
+        {
+            visitFuncdefs(ctx.funcdefs());
+        }
+        return null;
+    }
+    public String visitFdef(SPLParser.FdefContext ctx)
+    {
+        String funcName = ctx.NAME().getText();
+        funcMap.put(funcName, ctx.body());
+        /*String code = "";
+        visitBody(ctx.body());
+        visitAtom(ctx.atom());*/
+        return null;
+    }
+
+    public String visitBody(SPLParser.BodyContext ctx)
+    {
+        visitAlgo(ctx.algo());
+        return null;
+    }
+    public String visitProcdefs(SPLParser.ProcdefsContext ctx)
+    {
         return null;
     }
 
@@ -128,11 +171,15 @@ public class Translator extends SPLBaseVisitor<String> {
 
         }else { //  NAME(INPUT)
 
+            String function_code = "";
             String code = "CALL ";
             SymbolEntry function = symbolTable.lookupFunction(ctx.NAME().getText(), null, null);
             code += function.getName() + '(';
             for (int i=0; i<ctx.input().atom().size();i++)
             {
+                //tempVariable.newTemp();
+                //String t = tempVariable.printTemp();
+
                 String var = visitAtom(ctx.input().atom(i));
                 if (i>0){
                     code += ", ";
@@ -149,12 +196,15 @@ public class Translator extends SPLBaseVisitor<String> {
                 if (symbol!=null)
                 {
                     code +=symbol.getTempVariable();
+                    //function_code += (t + " = " +symbol.getTempVariable() +"\n");
                 }else{
                     code += var;
+                    //function_code += (t + " = " +var +"\n");
                 }
             }
 
             intermediateCode.append(code + ")\n");
+           // intermediateCode.append(function_code);
         }
         return null;
     }
@@ -210,13 +260,19 @@ public class Translator extends SPLBaseVisitor<String> {
         }else{
 
             tempVariable.newTemp();
+            String t = tempVariable.printTemp();
+
+            String function_code = "";
             String code = tempVariable.printTemp() + " = CALL ";
+
             SymbolEntry function = symbolTable.lookupFunction(ctx.NAME().getText(), null, null);
             code += function.getName() + '(';
             String t1="";
             for (int i=0; i<ctx.input().atom().size();i++)
             {
                 t1 = visitAtom(ctx.input().atom(i));
+                //tempVariable.newTemp();
+                //String t2 = tempVariable.printTemp();
                 if (i>0){
                     code += ", ";
                 }
@@ -232,15 +288,18 @@ public class Translator extends SPLBaseVisitor<String> {
                 if (symbol!=null)
                 {
                     code +=symbol.getTempVariable();
+                    //function_code += t2 + " = " + symbol.getTempVariable() + "\n";
                 }else{
                     code += t1;
+                    //function_code += t2 + " = " + t1 + "\n";
                 }
             }
 
             intermediateCode.append(code + ")\n");
+            //intermediateCode.append(function_code);
 
             SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), null);
-            String varCode = symbol.getRenamedVariable() + " = " + t1;
+            String varCode = symbol.getRenamedVariable() + " = " + t;
             intermediateCode.append(varCode);
             intermediateCode.append("\n");
         }

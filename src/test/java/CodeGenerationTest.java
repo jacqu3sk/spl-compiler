@@ -280,7 +280,7 @@ v1 = t3
 PRINT v1
 t5 = 10
 t4 = CALL gx(t5)
-v2 = t5
+v2 = t4
 STOP
 """;
         assertEquals(expected_code, translator.getIntermediateCode());
@@ -375,7 +375,7 @@ GOTO L2
 REM L1
 t5 = 10
 t4 = CALL gx(t5)
-v2 = t5
+v2 = t4
 REM L2
 STOP
 """;
@@ -471,12 +471,12 @@ t3 = 10
 IF t2=t3 THEN L1
 t5 = 20
 t4 = CALL gx(t5)
-v2 = t5
+v2 = t4
 GOTO L2
 REM L1
 t7 = 10
 t6 = CALL gx(t7)
-v2 = t7
+v2 = t6
 REM L2
 STOP
 """;
@@ -572,12 +572,12 @@ t3 = 10
 IF t2=t3 THEN L1
 t5 = 10
 t4 = CALL gx(t5)
-v2 = t5
+v2 = t4
 GOTO L2
 REM L1
 t7 = 20
 t6 = CALL gx(t7)
-v2 = t7
+v2 = t6
 REM L2
 STOP
 """;
@@ -678,18 +678,18 @@ t6 = 2
 IF t3=t4 THEN L1
 t8 = 20
 t7 = CALL gx(t8)
-v2 = t8
+v2 = t7
 GOTO L3
 REM L1
 IF t5=t6 THEN L2
 t10 = 20
 t9 = CALL gx(t10)
-v2 = t10
+v2 = t9
 GOTO L2
 REM L2
 t12 = 10
 t11 = CALL gx(t12)
-v2 = t12
+v2 = t11
 REM L3
 STOP
 """;
@@ -793,12 +793,12 @@ REM L1
 IF t5=t6 THEN L2
 t8 = 20
 t7 = CALL gx(t8)
-v2 = t8
+v2 = t7
 GOTO L3
 REM L2
 t10 = 10
 t9 = CALL gx(t10)
-v2 = t10
+v2 = t9
 REM L3
 STOP
 """;
