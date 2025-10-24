@@ -181,6 +181,24 @@ public class SymbolTable {
     }
 
     /**
+     * Lookup a procedure in the appropriate scope chain
+     * @param name Variable name to look up
+     * @param currentScope Current procedure/function name (null if in main/global)
+     * @param scopeType Current scope type
+     * @return SymbolEntry if found, null otherwise
+     */
+    public SymbolEntry lookupProcedure(String name, String currentScope, 
+                                     ScopeType scopeType) {
+        
+        // Finally, check global scope (accessible from everywhere)
+        if (procedures.containsKey(name)) {
+            return procedures.get(name);
+        }
+        
+        return null; // Not found
+    }
+
+    /**
      * Update a variable in the appropriate scope chain
      * @param name Variable name to look up
      * @param currentScope Current procedure/function name (null if in main/global)

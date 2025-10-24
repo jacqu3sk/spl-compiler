@@ -134,7 +134,7 @@ STOP
                 }
                 x = (10 plus 5);
                 print x;
-                gx(10);
+                x = gx(10);
                 halt
             }
             """;
@@ -190,14 +190,17 @@ t3 = t1+t2
 v1 = t3
 PRINT v1
 t4 = 10
-CALL gx(t4)
+v5 = t4
+STOP
+t5 = v5
+v1 = t5
 STOP
 """;
         assertEquals(expected_code, translator.getIntermediateCode());
     }
 
     @Test
-    void CodeGeneration_FunctionCall_Success2() {
+    void CodeGeneration_ProcCall_Success() {
         String exampleProgram =  """
             glob {
                 x
@@ -223,7 +226,7 @@ STOP
                 }
                 x = (10 plus 5);
                 print x;
-                y = gx(10);
+                hx();
                 halt
             }
             """;
@@ -278,9 +281,7 @@ t2 = 5
 t3 = t1+t2
 v1 = t3
 PRINT v1
-t5 = 10
-t4 = CALL gx(t5)
-v2 = t4
+STOP
 STOP
 """;
         assertEquals(expected_code, translator.getIntermediateCode());
@@ -373,9 +374,11 @@ t3 = 10
 IF t2=t3 THEN L1
 GOTO L2
 REM L1
-t5 = 10
-t4 = CALL gx(t5)
-v2 = t4
+t4 = 10
+v5 = t4
+STOP
+t5 = v5
+v2 = t5
 REM L2
 STOP
 """;
@@ -469,14 +472,18 @@ PRINT v1
 t2 = v1
 t3 = 10
 IF t2=t3 THEN L1
-t5 = 20
-t4 = CALL gx(t5)
-v2 = t4
+t4 = 20
+v5 = t4
+STOP
+t5 = v5
+v2 = t5
 GOTO L2
 REM L1
-t7 = 10
-t6 = CALL gx(t7)
-v2 = t6
+t6 = 10
+v5 = t6
+STOP
+t7 = v5
+v2 = t7
 REM L2
 STOP
 """;
@@ -570,14 +577,18 @@ PRINT v1
 t2 = v1
 t3 = 10
 IF t2=t3 THEN L1
-t5 = 10
-t4 = CALL gx(t5)
-v2 = t4
+t4 = 10
+v5 = t4
+STOP
+t5 = v5
+v2 = t5
 GOTO L2
 REM L1
-t7 = 20
-t6 = CALL gx(t7)
-v2 = t6
+t6 = 20
+v5 = t6
+STOP
+t7 = v5
+v2 = t7
 REM L2
 STOP
 """;
@@ -676,20 +687,26 @@ t4 = 10
 t5 = v7
 t6 = 2
 IF t3=t4 THEN L1
-t8 = 20
-t7 = CALL gx(t8)
-v2 = t7
+t7 = 20
+v5 = t7
+STOP
+t8 = v5
+v2 = t8
 GOTO L3
 REM L1
 IF t5=t6 THEN L2
-t10 = 20
-t9 = CALL gx(t10)
-v2 = t9
+t9 = 20
+v5 = t9
+STOP
+t10 = v5
+v2 = t10
 GOTO L2
 REM L2
-t12 = 10
-t11 = CALL gx(t12)
-v2 = t11
+t11 = 10
+v5 = t11
+STOP
+t12 = v5
+v2 = t12
 REM L3
 STOP
 """;
@@ -791,14 +808,18 @@ IF t3=t4 THEN L2
 GOTO L1
 REM L1
 IF t5=t6 THEN L2
-t8 = 20
-t7 = CALL gx(t8)
-v2 = t7
+t7 = 20
+v5 = t7
+STOP
+t8 = v5
+v2 = t8
 GOTO L3
 REM L2
-t10 = 10
-t9 = CALL gx(t10)
-v2 = t9
+t9 = 10
+v5 = t9
+STOP
+t10 = v5
+v2 = t10
 REM L3
 STOP
 """;

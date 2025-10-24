@@ -161,7 +161,7 @@ public class Main {
                 x = 10;
                 print x;
                 a = 2;
-                if ((x eq 10) or (a eq 2)) {
+                if ((x eq 10) and (a eq 2)) {
                     y = gx(10)
                 }else{
                     y = gx(20)
