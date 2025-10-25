@@ -3,6 +3,7 @@ import org.antlr.v4.runtime.tree.*;
 import generated.SPLLexer;
 import generated.SPLParser;
 import symbolTable.*;
+import translator.Translator;
 import typeChecker.*;
 
 public class Main {
@@ -122,6 +123,10 @@ public class Main {
         else {
             System.out.println("Type Checking failed");
         }
+
+        Translator translator = new Translator(symbolTable,tree);
+        translator.generateIntermediateCode();
+        translator.printIntermediateCode();
     }
     
     /**
@@ -153,8 +158,14 @@ public class Main {
                     a
                     b
                 }
-                x = (10 plus 5);
+                x = 10;
                 print x;
+                a = 2;
+                if ((x eq 10) and (a eq 2)) {
+                    y = gx(10)
+                }else{
+                    y = gx(20)
+                };
                 halt
             }
             """;

@@ -7,6 +7,7 @@ public class SymbolEntry {
     private int nodeId;       // Unique identifier for the parse tree node
     private String scopeOwner; // Name of procedure/function if in local scope
     private boolean isParameter; // True if this is a parameter
+    private String tempVariable; //Temporary variable name for intermediate code generation
     
     // Constructor
     public SymbolEntry(String name, SymbolType type, ScopeType scope, 
@@ -17,6 +18,7 @@ public class SymbolEntry {
         this.nodeId = nodeId;
         this.scopeOwner = scopeOwner;
         this.isParameter = isParameter;
+        this.tempVariable = "";
     }
     
     public String getName() {
@@ -56,6 +58,14 @@ public class SymbolEntry {
     public int getNodeId() {
         return nodeId;
     }
+
+    public String getRenamedVariable() {
+        return "v" + nodeId;
+    }
+
+    public String getTempVariable() {
+        return tempVariable;
+    }
     
     public void setNodeId(int newId) {
         nodeId = newId;
@@ -67,5 +77,9 @@ public class SymbolEntry {
     
     public void setParameter(boolean newValue) {
         isParameter = newValue;
+    }
+
+    public void setTempVariable(String temp) {
+        tempVariable = temp;
     }
 }
