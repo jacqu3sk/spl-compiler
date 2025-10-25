@@ -32,9 +32,11 @@ func {
         return x
     }
     func3(a b c) {
-        local {}
-        a = a;
-        return ((a plus b) plus c)
+        local {
+            result
+        }
+        result = ((a plus b) plus c);
+        return result
     }
 }
 main {

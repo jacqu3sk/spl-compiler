@@ -2,9 +2,11 @@ glob {}
 proc {}
 func {
     getValue(x) {
-        local {}
-        x = (x mult 2);
-        return x
+        local {
+            result
+        }
+        result = (x mult 2);
+        return result
     }
 }
 main {

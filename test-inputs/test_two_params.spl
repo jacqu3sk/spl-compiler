@@ -2,9 +2,11 @@ glob {}
 proc {}
 func {
     add(a b) {
-        local {}
-        a = (a plus b);
-        return a
+        local {
+            result
+        }
+        result = (a plus b);
+        return result
     }
 }
 main {

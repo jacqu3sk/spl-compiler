@@ -291,9 +291,15 @@ public class Translator extends SPLBaseVisitor<String> {
         if (ctx.getText().startsWith("halt")) { // INSTR ::= halt 
             intermediateCode.append("STOP\n");
 
-        } else if (ctx.getText().startsWith("print")) { // INSTR ::= print OUTPUT 
-            intermediateCode.append("PRINT ");
-            visitOutput(ctx.output());
+        } else if (ctx.output() != null) { // INSTR ::= print OUTPUT 
+            if (ctx.output().atom() != null && ctx.output().atom().NUMBER() != null) {
+                // For numbers, generate the temp assignment first, then print it
+                String temp = visitAtom(ctx.output().atom(), null);
+                intermediateCode.append("PRINT " + temp + "\n");
+            } else {
+                intermediateCode.append("PRINT ");
+                visitOutput(ctx.output());
+            }
 
         }else if (ctx.assign()!=null) { // INSTR ::= ASSIGN 
            visitAssign(ctx.assign());
@@ -356,22 +362,18 @@ public class Translator extends SPLBaseVisitor<String> {
             String code = ctx.STRING().getText();
             intermediateCode.append(code + "\n");
         }else if (ctx.atom() !=null) {
-            if (ctx.atom().NUMBER() !=null) // OUTPUT ::= ATOM
+            // For variables
+            String scopeToUse = currentFunctionScope != null ? currentFunctionScope : getIntermediateCode();
+            SymbolEntry symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), scopeToUse, ScopeType.LOCAL);
+            if (symbol==null)
             {
-                visitAtom(ctx.atom(),null);
-            }else{
-                SymbolEntry symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), getIntermediateCode(), ScopeType.MAIN);
-                if (symbol==null)
-                {
-                    symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), getIntermediateCode(), ScopeType.LOCAL);
-                }
-                if (symbol==null)
-                {
-                    symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), getIntermediateCode(), null);
-                }
-                intermediateCode.append(symbol.getRenamedVariable() + "\n");
+                symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), scopeToUse, ScopeType.MAIN);
             }
-            
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(ctx.atom().var().getText(), scopeToUse, null);
+            }
+            intermediateCode.append(symbol.getRenamedVariable() + "\n");
         }
         return null;
     }
@@ -430,7 +432,16 @@ public class Translator extends SPLBaseVisitor<String> {
             intermediateCode.append(function_code);
             String returnT = inlineFunction(function.getName(),funcMap.get(function.getName()));
 
-            SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), null);
+            String scopeToUse = currentFunctionScope != null ? currentFunctionScope : getIntermediateCode();
+            SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), scopeToUse, ScopeType.LOCAL);
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(ctx.var().getText(), scopeToUse, ScopeType.MAIN);
+            }
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(ctx.var().getText(), scopeToUse, null);
+            }
             String varCode = symbol.getRenamedVariable() + " = " + returnT;
             intermediateCode.append(varCode);
             intermediateCode.append("\n");
@@ -623,9 +634,7 @@ public class Translator extends SPLBaseVisitor<String> {
                 return term;
             }
 
-            tempVariable.newTemp();
-            String t1 = tempVariable.printTemp();
-            visitTerm(ctx.term(0),l1,l2);
+            String t1 = visitTerm(ctx.term(0),l1,l2);
             tempVariable.newTemp();
             String t2 = tempVariable.printTemp();
             intermediateCode.append(t2 + " = " + unopCode + t1 + "\n");
