@@ -479,12 +479,12 @@ REM L1
 t4 = 10
 v5 = t4
 STOP
-t5 = v5
-v2 = t5
+t6 = v5
+v2 = t6
 GOTO L3
 REM L2
-t6 = 20
-v5 = t6
+t5 = 20
+v5 = t5
 STOP
 t7 = v5
 v2 = t7
@@ -586,12 +586,12 @@ REM L1
 t4 = 20
 v5 = t4
 STOP
-t5 = v5
-v2 = t5
+t6 = v5
+v2 = t6
 GOTO L3
 REM L2
-t6 = 10
-v5 = t6
+t5 = 10
+v5 = t5
 STOP
 t7 = v5
 v2 = t7
@@ -701,12 +701,12 @@ REM L1
 t7 = 10
 v5 = t7
 STOP
-t8 = v5
-v2 = t8
+t9 = v5
+v2 = t9
 GOTO L3
 REM L2
-t9 = 20
-v5 = t9
+t8 = 20
+v5 = t8
 STOP
 t10 = v5
 v2 = t10
@@ -814,12 +814,12 @@ REM L1
 t7 = 10
 v5 = t7
 STOP
-t8 = v5
-v2 = t8
+t9 = v5
+v2 = t9
 GOTO L3
 REM L2
-t9 = 20
-v5 = t9
+t8 = 20
+v5 = t8
 STOP
 t10 = v5
 v2 = t10

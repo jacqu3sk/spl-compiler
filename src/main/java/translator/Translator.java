@@ -4,6 +4,10 @@ package translator;
  */
 
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 
 import org.antlr.v4.runtime.tree.*;
@@ -69,6 +73,44 @@ public class Translator extends SPLBaseVisitor<String> {
     public void generateIntermediateCode()
     {
         visit(tree);
+        addInlining();
+
+        createHTML();
+    }
+
+    /**
+     * Creates HTML file to display intermediate code
+     */
+    public void createHTML()
+    {
+        String html = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title> Intermediate Code </title>
+                </head>
+                <body>
+                    <h2> Generated Intermediate Code </h2>
+                    <p>
+                """;
+        String lines[] = getIntermediateCode().split("\n");
+        for (int i = 0; i < lines.length; i++) {
+            html += lines[i];
+            html += "<br>";
+        }
+        html += """
+                    </p>
+                </body>
+                </html>
+                """;
+
+        Path filePath = Path.of("intermediateCode.html");
+        try{
+            Files.writeString(filePath, html, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            System.out.println("HTML file created successfully: " + filePath.toAbsolutePath());
+        } catch (IOException e) {
+            System.out.println(e);
+        }
     }
 
      /**
@@ -147,10 +189,24 @@ public class Translator extends SPLBaseVisitor<String> {
      * @param ctx Fdef context
      * @return string of temporary variable used to store the return value
      */
-    public String inlineFunction(String functionName, SPLParser.FdefContext ctx)
+    public String inlineFunction(String functionName, SPLParser.FdefContext ctx, String[] parameters)
     {
         String previousScope = currentFunctionScope;
         currentFunctionScope = functionName;
+        SPLParser.ParamContext params = ctx.param();
+        for (int i=0; i< params.maxthree().var().size(); i++)
+        {
+            SymbolEntry symbol = symbolTable.lookupVariable(params.maxthree().var(i).getText(),functionName , ScopeType.LOCAL);
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(params.maxthree().var(i).getText(), functionName, ScopeType.MAIN);
+            }
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(params.maxthree().var(i).getText(), functionName, null);
+            }
+            intermediateCode.append( symbol.getRenamedVariable() + " = " + parameters[i] + "\n");
+        }
         visitBody(ctx.body());
         String result = visitAtom(ctx.atom(), functionName);
         currentFunctionScope = previousScope;
@@ -161,10 +217,24 @@ public class Translator extends SPLBaseVisitor<String> {
      * start searching procedure subtree stored in hashmap
      * @param ctx Pdef context
      */
-    public void inlineProc(String procName, SPLParser.PdefContext ctx)
+    public void inlineProc(String procName, SPLParser.PdefContext ctx, String[] parameters)
     {
         String previousScope = currentFunctionScope;
         currentFunctionScope = procName;
+        SPLParser.ParamContext params = ctx.param();
+        for (int i=0; i< params.maxthree().var().size(); i++)
+        {
+            SymbolEntry symbol = symbolTable.lookupVariable(params.maxthree().var(i).getText(),procName , ScopeType.LOCAL);
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(params.maxthree().var(i).getText(), procName, ScopeType.MAIN);
+            }
+            if (symbol==null)
+            {
+                symbol = symbolTable.lookupVariable(params.maxthree().var(i).getText(), procName, null);
+            }
+            intermediateCode.append( symbol.getRenamedVariable() + " = " + parameters[i] + "\n");
+        }
         visitBody(ctx.body());
         currentFunctionScope = previousScope;
     }
@@ -312,9 +382,10 @@ public class Translator extends SPLBaseVisitor<String> {
 
         }else { //  INSTR ::= NAME(INPUT)
 
-            String function_code = "";
             SymbolEntry function = symbolTable.lookupProcedure(ctx.NAME().getText(), null, null);
             SPLParser.ParamContext functionParameters = procMap.get(function.getName()).param();
+
+            String code = "CALL_" + function.getName() + "(";
 
             if (ctx.input().atom().size() != functionParameters.maxthree().var().size())
             {
@@ -324,27 +395,17 @@ public class Translator extends SPLBaseVisitor<String> {
 
             for (int i=0; i<ctx.input().atom().size();i++)
             {
+                if (i>0)
+                {
+                    code += ",";
+                }
 
-                String t1 = visitAtom(ctx.input().atom(i),null);
+                String t = visitAtom(ctx.input().atom(i),null);
+                code += t;
 
-                SymbolEntry symbol = symbolTable.lookupVariable(functionParameters.maxthree().var(i).getText(), function.getName(), ScopeType.LOCAL);
-                if (symbol==null)
-                {
-                    symbol = symbolTable.lookupVariable(functionParameters.maxthree().var(i).getText(), function.getName(), ScopeType.MAIN);
-                }
-                if (symbol==null)
-                {
-                    symbol = symbolTable.lookupVariable(functionParameters.maxthree().var(i).getText(), function.getName(), null);
-                }
-                if (symbol!=null)
-                {
-                    function_code += symbol.getRenamedVariable() + " = " + t1 + "\n";
-                }
             }
 
-            intermediateCode.append(function_code);
-            inlineProc(function.getName(), procMap.get(function.getName()));
-            
+            intermediateCode.append(code + ")\n");
         }
         return null;
     }
@@ -406,31 +467,26 @@ public class Translator extends SPLBaseVisitor<String> {
 
         }else{ // ASSIGN ::= VAR=NAME(INPUT)
 
-            String function_code = "";
             SymbolEntry function = symbolTable.lookupFunction(ctx.NAME().getText(), null, null);
             SPLParser.ParamContext functionParameters = funcMap.get(function.getName()).param();
+            String code = "CALL_" + function.getName() + "(";
+
+            if (ctx.input().atom().size() != functionParameters.maxthree().var().size())
+            {
+                System.out.println("Error: Number of arguments does not match number of parameters in procedure: " + function.getName());
+                return null;
+            }
 
             for (int i=0; i<ctx.input().atom().size();i++)
             {
-                String t1 = visitAtom(ctx.input().atom(i),null);
-
-                SymbolEntry symbol = symbolTable.lookupVariable(functionParameters.maxthree().var(i).getText(), function.getName(), ScopeType.LOCAL);
-                if (symbol==null)
+                if (i>0)
                 {
-                    symbol = symbolTable.lookupVariable(functionParameters.maxthree().var(i).getText(), function.getName(), ScopeType.MAIN);
+                    code += ",";
                 }
-                if (symbol==null)
-                {
-                    symbol = symbolTable.lookupVariable(functionParameters.maxthree().var(i).getText(), function.getName(), null);
-                }
-                if (symbol!=null)
-                {
-                    function_code += symbol.getRenamedVariable() + " = " + t1 + "\n";
-                }
+                String t = visitAtom(ctx.input().atom(i),null);
+                code += t;
             }
 
-            intermediateCode.append(function_code);
-            String returnT = inlineFunction(function.getName(),funcMap.get(function.getName()));
 
             String scopeToUse = currentFunctionScope != null ? currentFunctionScope : getIntermediateCode();
             SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), scopeToUse, ScopeType.LOCAL);
@@ -442,9 +498,8 @@ public class Translator extends SPLBaseVisitor<String> {
             {
                 symbol = symbolTable.lookupVariable(ctx.var().getText(), scopeToUse, null);
             }
-            String varCode = symbol.getRenamedVariable() + " = " + returnT;
+            String varCode = symbol.getRenamedVariable() + " = " + code + ")\n";
             intermediateCode.append(varCode);
-            intermediateCode.append("\n");
         }
 
         return null;
@@ -680,5 +735,101 @@ public class Translator extends SPLBaseVisitor<String> {
                 return ctx.getText();
         }
         
+    }
+
+    public String addInlining()
+    {
+        String copyCode = getIntermediateCode();
+        String[] lines = copyCode.split("\n");
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i].trim();
+            
+            if (line.isEmpty()) {
+                continue; // Skip empty lines
+            }
+            
+            // If this line is a call(CALL_)
+            if (line.startsWith("CALL_")) {
+                String functionName = extractFunctionName(line);
+                String allParameters = line.substring(line.indexOf('(')+1,line.indexOf(')'));
+                String[] parameters = allParameters.split(",");
+                if (parameters.length==0)
+                {
+                    parameters[0] = allParameters;
+                }
+                if (functionName!=null)
+                {
+                    SPLParser.PdefContext proc= procMap.get(functionName);
+                    intermediateCode.setLength(0);
+
+                    if (proc!=null)
+                    {
+                        inlineProc(functionName, proc, parameters);
+                    }
+                    
+                    lines[i] = intermediateCode.toString();
+                }
+            }else if (line.contains("CALL_")) {
+                String variableName = extractVariableName(line);
+                String functionName = extractFunctionName(line);
+                String allParameters = line.substring(line.indexOf('(')+1,line.indexOf(')'));
+                String[] parameters = allParameters.split(",");
+                if (parameters.length==0)
+                {
+                    parameters[0] = allParameters;
+                }
+                if (functionName!=null)
+                {
+                    SPLParser.FdefContext function = funcMap.get(functionName);
+                    intermediateCode.setLength(0);
+                    String returnVar="";
+                    if (function!=null)
+                    {
+                        returnVar = inlineFunction(functionName, function, parameters);
+                    }
+
+                    variableName = variableName.trim();
+                    intermediateCode.append(variableName + " = " + returnVar + "\n");
+                    
+                    lines[i] = intermediateCode.toString();
+                }
+            }
+            
+        }
+
+        intermediateCode.setLength(0);
+        for (int i = 0; i < lines.length; i++) {
+            intermediateCode.append(lines[i]);
+            if (!lines[i].contains("\n"))
+            {
+                intermediateCode.append("\n");
+            }
+        }
+
+        return null;
+    }
+
+     /**
+     * Extract function/procedure name from CALL statement
+     * @param line the line containing CALL_
+     * @return the function/procedure name or null if not found
+     */
+    private String extractFunctionName(String line) {
+        // Line format: "CALL_<functionName>()"
+        int underscorePos = line.indexOf('_');
+        int bracketPos = line.indexOf('(');
+        String name = line.substring(underscorePos+1, bracketPos);
+        return name;
+    }
+     /**
+     * Extract variable name from CALL statement
+     * @param line the line containing CALL_
+     * @return the variable name or null if not found
+     */
+    private String extractVariableName(String line) {
+        // Line format: "<variableName> = CALL_<functionName>()"
+        int eqPos = line.indexOf('=');
+        String name = line.substring(0,eqPos);
+        return name;
     }
 }
