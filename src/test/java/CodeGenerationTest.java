@@ -379,7 +379,9 @@ v5 = t4
 STOP
 t5 = v5
 v2 = t5
+GOTO L3
 REM L2
+REM L3
 STOP
 """;
         assertEquals(expected_code, translator.getIntermediateCode());
@@ -472,19 +474,21 @@ PRINT v1
 t2 = v1
 t3 = 10
 IF t2=t3 THEN L1
-t4 = 20
+GOTO L2
+REM L1
+t4 = 10
 v5 = t4
 STOP
 t5 = v5
 v2 = t5
-GOTO L2
-REM L1
-t6 = 10
+GOTO L3
+REM L2
+t6 = 20
 v5 = t6
 STOP
 t7 = v5
 v2 = t7
-REM L2
+REM L3
 STOP
 """;
         assertEquals(expected_code, translator.getIntermediateCode());
@@ -577,19 +581,21 @@ PRINT v1
 t2 = v1
 t3 = 10
 IF t2=t3 THEN L1
-t4 = 10
+GOTO L2
+REM L1
+t4 = 20
 v5 = t4
 STOP
 t5 = v5
 v2 = t5
-GOTO L2
-REM L1
-t6 = 20
+GOTO L3
+REM L2
+t6 = 10
 v5 = t6
 STOP
 t7 = v5
 v2 = t7
-REM L2
+REM L3
 STOP
 """;
         assertEquals(expected_code, translator.getIntermediateCode());
@@ -686,27 +692,24 @@ t3 = v1
 t4 = 10
 t5 = v7
 t6 = 2
-IF t3=t4 THEN L1
-t7 = 20
+IF t3=t4 THEN L4
+GOTO L2
+REM L4
+IF t5=t6 THEN L1
+GOTO L2
+REM L1
+t7 = 10
 v5 = t7
 STOP
 t8 = v5
 v2 = t8
 GOTO L3
-REM L1
-IF t5=t6 THEN L2
+REM L2
 t9 = 20
 v5 = t9
 STOP
 t10 = v5
 v2 = t10
-GOTO L2
-REM L2
-t11 = 10
-v5 = t11
-STOP
-t12 = v5
-v2 = t12
 REM L3
 STOP
 """;
@@ -804,18 +807,18 @@ t3 = v1
 t4 = 10
 t5 = v7
 t6 = 2
-IF t3=t4 THEN L2
-GOTO L1
+IF t3=t4 THEN L1
+IF t5=t6 THEN L1
+GOTO L2
 REM L1
-IF t5=t6 THEN L2
-t7 = 20
+t7 = 10
 v5 = t7
 STOP
 t8 = v5
 v2 = t8
 GOTO L3
 REM L2
-t9 = 10
+t9 = 20
 v5 = t9
 STOP
 t10 = v5
