@@ -174,10 +174,14 @@ public class IntegrationTest {
         // Run bwbasic
         ProcessBuilder pb = new ProcessBuilder("bwbasic", tempFile.getAbsolutePath());
         pb.redirectErrorStream(true);
+        pb.redirectInput(ProcessBuilder.Redirect.PIPE); // Prevent interactive mode
         
         Process process = pb.start();
         
-        // Read output
+        // Close stdin immediately to prevent bwbasic from waiting for input
+        process.getOutputStream().close();
+        
+        // Read output with timeout to prevent hanging
         StringBuilder output = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream()))) {
