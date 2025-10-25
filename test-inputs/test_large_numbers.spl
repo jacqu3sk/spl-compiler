@@ -5,7 +5,7 @@ main {
     var {
         big
     }
-    big = 999999999;
+    big = 99999;
     print big;
     halt
 }

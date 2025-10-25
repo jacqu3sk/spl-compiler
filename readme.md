@@ -9,8 +9,19 @@
 - Execute the demo driver: `mvn exec:java`
 
 ## Testing
-- Run the unit and integration tests: `mvn test`
-- CI runs `mvn -B verify` on pushes and pull requests via GitHub Actions (`.github/workflows/ci.yml`).
+- Run all tests: `mvn test`
+- Run only integration tests: `mvn test -Dtest=IntegrationTest`
+- See [TESTING.md](TESTING.md) for detailed testing documentation
+- CI runs `mvn -B verify` on pushes and pull requests via GitHub Actions (`.github/workflows/ci.yml`)
+
+### Integration Tests
+The integration test suite automatically:
+1. Compiles all `.spl` files in `test-inputs/`
+2. Generates BASIC code for each
+3. Executes the BASIC code with `bwbasic`
+4. Verifies output matches expected results in corresponding `.txt` files
+
+**Note**: Install `bwbasic` to run integration tests: `sudo apt-get install bwbasic`
 
 ## Project Layout
 - `src/main/antlr4`: SPL grammar (`SPL.g4`)

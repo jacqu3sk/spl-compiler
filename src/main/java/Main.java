@@ -17,12 +17,22 @@ public class Main {
                 return;
             }
             
-            // Read input from file
+            // Check for --basic-only flag
+            boolean basicOnly = false;
             String inputFile = args[0];
+            
+            if (args.length > 1 && args[1].equals("--basic-only")) {
+                basicOnly = true;
+            } else if (args[0].equals("--basic-only") && args.length > 1) {
+                basicOnly = true;
+                inputFile = args[1];
+            }
+            
+            // Read input from file
             CharStream input = CharStreams.fromFileName(inputFile);
             
             // Run the compiler
-            compile(input, inputFile);
+            compile(input, inputFile, basicOnly);
             
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
@@ -33,24 +43,27 @@ public class Main {
     /**
      * Compile the SPL program
      */
-    public static void compile(CharStream input, String sourceName) {
-        System.out.println("=================================================");
-        System.out.println("SPL COMPILER - Semantic Analysis Phase");
-        System.out.println("=================================================");
-        System.out.println("Source: " + sourceName);
-        System.out.println("=================================================\n");
+    public static void compile(CharStream input, String sourceName, boolean basicOnly) {
+        if (!basicOnly) {
+            System.out.println("=================================================");
+            System.out.println("SPL COMPILER - Semantic Analysis Phase");
+            System.out.println("=================================================");
+            System.out.println("Source: " + sourceName);
+            System.out.println("=================================================\n");
+        }
         
         // Step 1: Lexical Analysis
-        System.out.println("Phase 1: Lexical Analysis...");
+        if (!basicOnly) System.out.println("Phase 1: Lexical Analysis...");
         SPLLexer lexer = new SPLLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         
         // Step 2: Syntax Analysis (Parsing)
-        System.out.println("Phase 2: Syntax Analysis...");
+        if (!basicOnly) System.out.println("Phase 2: Syntax Analysis...");
         SPLParser parser = new SPLParser(tokens);
         
         // Error handling for parser
         parser.removeErrorListeners();
+        final boolean finalBasicOnly = basicOnly;
         parser.addErrorListener(new BaseErrorListener() {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer,
@@ -58,8 +71,10 @@ public class Main {
                                   int line, int charPositionInLine,
                                   String msg,
                                   RecognitionException e) {
-                System.err.println("Syntax Error at line " + line + ":" + 
-                                 charPositionInLine + " - " + msg);
+                if (!finalBasicOnly) {
+                    System.err.println("Syntax Error at line " + line + ":" + 
+                                     charPositionInLine + " - " + msg);
+                }
             }
         });
         
@@ -67,14 +82,14 @@ public class Main {
         
         // Check if parsing was successful
         if (parser.getNumberOfSyntaxErrors() > 0) {
-            System.out.println("\n✗ Compilation failed due to syntax errors.");
+            if (!basicOnly) System.out.println("\n✗ Compilation failed due to syntax errors.");
             return;
         }
         
-        System.out.println("✓ Parsing successful");
+        if (!basicOnly) System.out.println("✓ Parsing successful");
         
         // Step 3: Semantic Analysis
-        System.out.println("\nPhase 3: Semantic Analysis...");
+        if (!basicOnly) System.out.println("\nPhase 3: Semantic Analysis...");
         ParseTreeWalker walker = new ParseTreeWalker();
         SPLSemanticAnalyzer analyzer = new SPLSemanticAnalyzer();
         
@@ -85,73 +100,91 @@ public class Main {
         SymbolTable symbolTable = analyzer.getSymbolTable();
         
         // Step 4: Report Results
-        System.out.println("\n=================================================");
-        System.out.println("SEMANTIC ANALYSIS RESULTS");
-        System.out.println("=================================================");
-        
-        if (symbolTable.hasErrors()) {
-            System.out.println("\n✗ Semantic errors found:\n");
-            int errorNum = 1;
-            for (String error : symbolTable.getErrors()) {
-                System.out.println(errorNum + ". " + error);
-                errorNum++;
+        if (!basicOnly) {
+            System.out.println("\n=================================================");
+            System.out.println("SEMANTIC ANALYSIS RESULTS");
+            System.out.println("=================================================");
+            
+            if (symbolTable.hasErrors()) {
+                System.out.println("\n✗ Semantic errors found:\n");
+                int errorNum = 1;
+                for (String error : symbolTable.getErrors()) {
+                    System.out.println(errorNum + ". " + error);
+                    errorNum++;
+                }
+                System.out.println("\nTotal errors: " + symbolTable.getErrors().size());
+            } else {
+                System.out.println("\n✓ No semantic errors found!");
+                System.out.println("✓ All name-scope rules are satisfied.");
             }
-            System.out.println("\nTotal errors: " + symbolTable.getErrors().size());
-        } else {
-            System.out.println("\n✓ No semantic errors found!");
-            System.out.println("✓ All name-scope rules are satisfied.");
+            
+            // Print symbol table
+            symbolTable.printTable();
+            
+            System.out.println("\n=================================================");
+            if (!symbolTable.hasErrors()) {
+                System.out.println("Compilation Status: SUCCESS");
+                System.out.println("Ready to proceed to next phase (code generation)");
+            } else {
+                System.out.println("Compilation Status: FAILED");
+                System.out.println("Fix semantic errors before proceeding");
+            }
+            System.out.println("=================================================\n");
         }
         
-        // Print symbol table
-        symbolTable.printTable();
-        
-        System.out.println("\n=================================================");
-        if (!symbolTable.hasErrors()) {
-            System.out.println("Compilation Status: SUCCESS");
-            System.out.println("Ready to proceed to next phase (code generation)");
-        } else {
-            System.out.println("Compilation Status: FAILED");
-            System.out.println("Fix semantic errors before proceeding");
+        // Exit early if there are errors
+        if (symbolTable.hasErrors()) {
+            return;
         }
-        System.out.println("=================================================\n");
 
         // Step 5: Type Checking
-        System.out.println("\n=================================================");
-        System.out.println("Phase 4: Type Checking...");
-        System.out.println("=================================================");
+        if (!basicOnly) {
+            System.out.println("\n=================================================");
+            System.out.println("Phase 4: Type Checking...");
+            System.out.println("=================================================");
+        }
         
-        TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
+        TypeErrorListener typeErrorListener = basicOnly ? new SilentTypeErrorListener() : new ConsoleTypeErrorListener();
         TypeChecker typeChecker = new TypeChecker(typeErrorListener);
         Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
         if (tc_ok) {
-            System.out.println("✓ Type Checking Completed Successfully!");
+            if (!basicOnly) System.out.println("✓ Type Checking Completed Successfully!");
         }
         else {
-            System.out.println("✗ Type Checking failed");
+            if (!basicOnly) System.out.println("✗ Type Checking failed");
             return;
         }
 
         // Step 6: Code Generation (Intermediate Code)
-        System.out.println("\n=================================================");
-        System.out.println("Phase 5: Intermediate Code Generation...");
-        System.out.println("=================================================");
+        if (!basicOnly) {
+            System.out.println("\n=================================================");
+            System.out.println("Phase 5: Intermediate Code Generation...");
+            System.out.println("=================================================");
+        }
         
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
-        translator.printIntermediateCode();
+        if (!basicOnly) translator.printIntermediateCode();
         
         // Step 7: BASIC Code Generation
-        System.out.println("\n=================================================");
-        System.out.println("Phase 6: BASIC Code Generation...");
-        System.out.println("=================================================");
+        if (!basicOnly) {
+            System.out.println("\n=================================================");
+            System.out.println("Phase 6: BASIC Code Generation...");
+            System.out.println("=================================================");
+        }
         
         BasicCodeGenerator basicGenerator = new BasicCodeGenerator(translator.getIntermediateCode());
         String basicCode = basicGenerator.generateBasicCode();
-        basicGenerator.printBasicCode();
         
-        System.out.println("\n=================================================");
-        System.out.println("COMPILATION COMPLETE!");
-        System.out.println("=================================================\n");
+        if (basicOnly) {
+            // Only print the BASIC code, nothing else
+            System.out.print(basicCode);
+        } else {
+            basicGenerator.printBasicCode();
+            System.out.println("\n=================================================");
+            System.out.println("COMPILATION COMPLETE!");
+            System.out.println("=================================================\n");
+        }
     }
     
     /**
@@ -204,6 +237,16 @@ public class Main {
         System.out.println("-------------------\n");
         
         CharStream input = CharStreams.fromString(exampleProgram);
-        compile(input, "example.spl");
+        compile(input, "example.spl", false);
+    }
+    
+    /**
+     * Silent type error listener for --basic-only mode
+     */
+    static class SilentTypeErrorListener implements TypeErrorListener {
+        @Override
+        public void onTypeError(ParserRuleContext ctx, String message) {
+            // Silently ignore errors in basic-only mode
+        }
     }
 }
