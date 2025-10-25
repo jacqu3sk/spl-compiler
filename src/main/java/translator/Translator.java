@@ -451,6 +451,43 @@ public class Translator extends SPLBaseVisitor<String> {
     }
 
     /**
+     * Generate conditional jump code for a condition
+     * Handles OR (delimited by #), AND (delimited by ,), and simple conditions
+     * @param condition The condition string from visitTerm
+     * @param trueLabel Label to jump to if condition is true
+     * @param falseLabel Label to jump to if condition is false
+     */
+    private void generateConditionalJump(String condition, String trueLabel, String falseLabel) {
+        if (condition.contains("#")) {
+            // Handle OR conditions: if ANY is true, jump to trueLabel
+            String[] orConditions = condition.split("#");
+            for (String cond : orConditions) {
+                intermediateCode.append("IF " + cond + " THEN " + trueLabel + "\n");
+            }
+            intermediateCode.append("GOTO " + falseLabel + "\n");
+            
+        } else if (condition.contains(",")) {
+            // Handle AND conditions: ALL must be true for trueLabel
+            String[] andConditions = condition.split(",");
+            for (int i = 0; i < andConditions.length - 1; i++) {
+                label.newLabel();
+                String lNext = label.printLabel();
+                intermediateCode.append("IF " + andConditions[i] + " THEN " + lNext + "\n");
+                intermediateCode.append("GOTO " + falseLabel + "\n");
+                intermediateCode.append("REM " + lNext + "\n");
+            }
+            // Last condition
+            intermediateCode.append("IF " + andConditions[andConditions.length - 1] + " THEN " + trueLabel + "\n");
+            intermediateCode.append("GOTO " + falseLabel + "\n");
+            
+        } else {
+            // Simple condition
+            intermediateCode.append("IF " + condition + " THEN " + trueLabel + "\n");
+            intermediateCode.append("GOTO " + falseLabel + "\n");
+        }
+    }
+
+    /**
      * visit Branch node in AST
      * BRANCH ::= if TERM { ALGO } || if TERM { ALGO } else { ALGO }
      * @param ctx Branch context
@@ -459,115 +496,37 @@ public class Translator extends SPLBaseVisitor<String> {
     public String visitBranch(SPLParser.BranchContext ctx)
     {
         label.newLabel();
-        String l1 = label.printLabel();
+        String lThen = label.printLabel(); // label for then-branch
         label.newLabel();
-        String l2 = label.printLabel();
+        String lElse = label.printLabel(); // label for else-branch
+        label.newLabel();
+        String lEnd = label.printLabel(); // label for end of if statement
         
-        String condition = visitTerm(ctx.term(),l1,l2);
-        if (condition.contains(","))
-        {
-            label.newLabel();
-            String l3 = label.printLabel();
-            String[] conditions = condition.split(",");
-
-            intermediateCode.append("IF " + conditions[0] + " THEN " + l1 + "\n");
-            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
-            {
-                visitAlgo(ctx.algo(0));
-            }else{
-                if (ctx.algo(1)!=null)
-                {
-                    visitAlgo(ctx.algo(1));
-                }
-            }
-            intermediateCode.append("GOTO "+l3+"\n");
-            intermediateCode.append("REM "+l1+"\n");
-            intermediateCode.append("IF " + conditions[1] + " THEN " + l2 + "\n");
-            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
-            {
-                visitAlgo(ctx.algo(0));
-            }else{
-                if (ctx.algo(1)!=null)
-                {
-                    visitAlgo(ctx.algo(1));
-                }
-            }
-            intermediateCode.append("GOTO "+l2+"\n");
-            
-            intermediateCode.append("REM "+l2+"\n");
-            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
-            {
-                if (ctx.algo(1)!=null)
-                {
-                    visitAlgo(ctx.algo(1));
-                }
-            }else{
-                visitAlgo(ctx.algo(0));
-            }
-
-            intermediateCode.append("REM "+l3+"\n");
-
-        }else if (condition.contains("#"))
-        {
-            label.newLabel();
-            String l3 = label.printLabel();
-            String[] conditions = condition.split("#");
-
-            intermediateCode.append("IF " + conditions[0] + " THEN " + l2 + "\n");
-            intermediateCode.append("GOTO "+l1+"\n");
-            
-            intermediateCode.append("REM "+l1+"\n");
-            intermediateCode.append("IF " + conditions[1] + " THEN " + l2 + "\n");
-            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
-            {
-                visitAlgo(ctx.algo(0));
-            }else{
-                if (ctx.algo(1)!=null)
-                {
-                    visitAlgo(ctx.algo(1));
-                }
-            }
-            intermediateCode.append("GOTO "+l3+"\n");
-            
-            intermediateCode.append("REM "+l2+"\n");
-            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
-            {
-                if (ctx.algo(1)!=null)
-                {
-                    visitAlgo(ctx.algo(1));
-                }
-            }else{
-                visitAlgo(ctx.algo(0));
-            }
-
-            intermediateCode.append("REM "+l3+"\n");
-
-        }else{
-            intermediateCode.append("IF " + condition + " THEN " + l1 + "\n");
-            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
-            {
-                visitAlgo(ctx.algo(0));
-            }else{
-                if (ctx.algo(1)!=null)
-                {
-                    visitAlgo(ctx.algo(1));
-                }
-            }
-            intermediateCode.append("GOTO "+l2+"\n");
-            intermediateCode.append("REM "+l1+"\n");
-            if (ctx.term().unop()!=null && ctx.term().unop().getText().equals("not"))
-            {
-                if (ctx.algo(1)!=null)
-                {
-                    visitAlgo(ctx.algo(1));
-                }
-            }else{
-                visitAlgo(ctx.algo(0));
-            }
-            
-            intermediateCode.append("REM "+l2+"\n");
+        String condition = visitTerm(ctx.term(), lThen, lElse);
+        boolean hasElse = ctx.algo(1) != null;
+        boolean hasNot = ctx.term().unop() != null && ctx.term().unop().getText().equals("not");
+        
+        // Generate conditional jump
+        generateConditionalJump(condition, lThen, lElse);
+        
+        // Then-branch
+        intermediateCode.append("REM " + lThen + "\n");
+        if (hasNot) {
+            if (hasElse) visitAlgo(ctx.algo(1));
+        } else {
+            visitAlgo(ctx.algo(0));
         }
-
+        intermediateCode.append("GOTO " + lEnd + "\n");
+        
+        // Else-branch
+        intermediateCode.append("REM " + lElse + "\n");
+        if (hasNot) {
+            visitAlgo(ctx.algo(0));
+        } else {
+            if (hasElse) visitAlgo(ctx.algo(1));
+        }
+        
+        intermediateCode.append("REM " + lEnd + "\n");
         return null;
     }
 
@@ -582,31 +541,37 @@ public class Translator extends SPLBaseVisitor<String> {
         if (ctx.getText().startsWith("while"))  // LOOP ::= while TERM { ALGO }
         { 
             label.newLabel();
-            String l1 = label.printLabel();
+            String lStart = label.printLabel();
             label.newLabel();
-            String l2 = label.printLabel();
+            String lBody = label.printLabel();
             label.newLabel();
-            String l3 = label.printLabel();
+            String lEnd = label.printLabel();
 
-            intermediateCode.append("REM " + l1 + "\n");
-            String t1 = visitTerm(ctx.term(), l2,l3);
-            intermediateCode.append("IF " + t1 + " THEN " +l2 + "\n");
-            intermediateCode.append("GOTO " + l3 + "\n");
-            intermediateCode.append("REM " + l2 + "\n");
+            intermediateCode.append("REM " + lStart + "\n");
+            String condition = visitTerm(ctx.term(), lBody, lEnd);
+            
+            // Generate conditional jump using helper method
+            generateConditionalJump(condition, lBody, lEnd);
+            
+            intermediateCode.append("REM " + lBody + "\n");
             visitAlgo(ctx.algo());
-            intermediateCode.append("GOTO " + l1 + "\n" + "REM " + l3+ "\n");
-        } else { // LOOP ::=do { ALGO } until TERM
+            intermediateCode.append("GOTO " + lStart + "\n");
+            intermediateCode.append("REM " + lEnd + "\n");
+            
+        } else { // LOOP ::= do { ALGO } until TERM
             label.newLabel();
-            String l1 = label.printLabel();
+            String lStart = label.printLabel();
             label.newLabel();
-            String l2 = label.printLabel();
+            String lEnd = label.printLabel();
 
-            intermediateCode.append("REM " + l1 + "\n");
+            intermediateCode.append("REM " + lStart + "\n");
             visitAlgo(ctx.algo());
-            String t1 = visitTerm(ctx.term(), l2,l1);
-            intermediateCode.append("IF " + t1 + " THEN " +l2 + "\n");
-            intermediateCode.append("GOTO " + l1 + "\n");
-            intermediateCode.append("REM " + l2 + "\n");
+            String condition = visitTerm(ctx.term(), lEnd, lStart);
+            
+            // Generate conditional jump using helper method
+            generateConditionalJump(condition, lEnd, lStart);
+            
+            intermediateCode.append("REM " + lEnd + "\n");
         }
 
         return null;
