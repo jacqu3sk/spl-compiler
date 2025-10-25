@@ -1,0 +1,10 @@
+glob {}
+proc {}
+func {}
+main {
+    var {
+        result
+    }
+    result = (((2 plus 3) mult 4) minus (10 div 2));
+    halt
+}

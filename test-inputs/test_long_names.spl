@@ -1,0 +1,20 @@
+glob {
+    very_long_global_variable_name_123
+}
+proc {}
+func {
+    aVeryLongFunctionNameThatIsStillValid() {
+        local {
+            local_var_with_long_name
+        }
+        local_var_with_long_name = 0;
+        return local_var_with_long_name
+    }
+}
+main {
+    var {
+        another_extremely_long_variable_name
+    }
+    another_extremely_long_variable_name = aVeryLongFunctionNameThatIsStillValid();
+    halt
+}

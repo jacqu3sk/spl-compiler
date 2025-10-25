@@ -1,0 +1,16 @@
+glob {}
+proc {
+    myProc(a b c) {
+        local {
+            x
+            y
+            z
+        }
+        x = a
+    }
+}
+func {}
+main {
+    var {}
+    halt
+}

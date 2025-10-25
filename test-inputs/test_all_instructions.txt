@@ -1,0 +1,4 @@
+Func called
+Proc called
+10
+Yes

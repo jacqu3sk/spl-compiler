@@ -1,0 +1,52 @@
+glob {
+    g1
+    g2
+}
+proc {
+    proc1() {
+        local {}
+        print "Proc1"
+    }
+    proc2(x) {
+        local {}
+        print x
+    }
+    proc3(a b c) {
+        local {
+            x
+            y
+            z
+        }
+        x = a
+    }
+}
+func {
+    func1() {
+        local {}
+        print "Func1";
+        return 1
+    }
+    func2(x) {
+        local {}
+        x = x;
+        return x
+    }
+    func3(a b c) {
+        local {
+            result
+        }
+        result = ((a plus b) plus c);
+        return result
+    }
+}
+main {
+    var {
+        result
+    }
+    proc1();
+    proc2(5);
+    result = func1();
+    result = func2(10);
+    result = func3(1 2 3);
+    halt
+}
