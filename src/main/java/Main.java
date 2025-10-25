@@ -5,6 +5,7 @@ import generated.SPLParser;
 import symbolTable.*;
 import translator.Translator;
 import typeChecker.*;
+import basic.BasicCodeGenerator;
 
 public class Main {
     public static void main(String[] args) {
@@ -114,19 +115,43 @@ public class Main {
         }
         System.out.println("=================================================\n");
 
+        // Step 5: Type Checking
+        System.out.println("\n=================================================");
+        System.out.println("Phase 4: Type Checking...");
+        System.out.println("=================================================");
+        
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
         TypeChecker typeChecker = new TypeChecker(typeErrorListener);
         Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
         if (tc_ok) {
-            System.out.println("Type Checking Completed Successfully!");
+            System.out.println("✓ Type Checking Completed Successfully!");
         }
         else {
-            System.out.println("Type Checking failed");
+            System.out.println("✗ Type Checking failed");
+            return;
         }
 
+        // Step 6: Code Generation (Intermediate Code)
+        System.out.println("\n=================================================");
+        System.out.println("Phase 5: Intermediate Code Generation...");
+        System.out.println("=================================================");
+        
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
         translator.printIntermediateCode();
+        
+        // Step 7: BASIC Code Generation
+        System.out.println("\n=================================================");
+        System.out.println("Phase 6: BASIC Code Generation...");
+        System.out.println("=================================================");
+        
+        BasicCodeGenerator basicGenerator = new BasicCodeGenerator(translator.getIntermediateCode());
+        String basicCode = basicGenerator.generateBasicCode();
+        basicGenerator.printBasicCode();
+        
+        System.out.println("\n=================================================");
+        System.out.println("COMPILATION COMPLETE!");
+        System.out.println("=================================================\n");
     }
     
     /**
@@ -148,9 +173,11 @@ public class Main {
             }
             func {
                 gx(value) {
-                    local{}
-                    halt;
-                    return value
+                    local{
+                        newvalue
+                    }
+                    newvalue = (value plus 1);
+                    return newvalue
                 }
             }
             main {
@@ -162,10 +189,11 @@ public class Main {
                 print x;
                 a = 2;
                 if ((x eq 10) and (a eq 2)) {
-                    y = gx(10)
+                    y = gx(15)
                 }else{
-                    y = gx(20)
+                    y = gx(25)
                 };
+                print y;
                 halt
             }
             """;

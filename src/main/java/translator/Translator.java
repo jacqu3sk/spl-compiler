@@ -34,6 +34,9 @@ public class Translator extends SPLBaseVisitor<String> {
     private HashMap<String, SPLParser.FdefContext> funcMap ;
     // Hashmap to store procedure name and sub-tree of AST
     private HashMap<String, SPLParser.PdefContext> procMap ;
+    
+    // Track current function/procedure scope for inlining
+    private String currentFunctionScope = null;
 
     /**
      * Constructor
@@ -146,17 +149,24 @@ public class Translator extends SPLBaseVisitor<String> {
      */
     public String inlineFunction(String functionName, SPLParser.FdefContext ctx)
     {
+        String previousScope = currentFunctionScope;
+        currentFunctionScope = functionName;
         visitBody(ctx.body());
-        return visitAtom(ctx.atom(), functionName);
+        String result = visitAtom(ctx.atom(), functionName);
+        currentFunctionScope = previousScope;
+        return result;
     }
 
      /**
      * start searching procedure subtree stored in hashmap
      * @param ctx Pdef context
      */
-    public void inlineProc(SPLParser.PdefContext ctx)
+    public void inlineProc(String procName, SPLParser.PdefContext ctx)
     {
+        String previousScope = currentFunctionScope;
+        currentFunctionScope = procName;
         visitBody(ctx.body());
+        currentFunctionScope = previousScope;
     }
 
     /**
@@ -232,7 +242,7 @@ public class Translator extends SPLBaseVisitor<String> {
         }else { // ATOM ::= VAR
             if (currentScope==null)
             {
-                currentScope = getIntermediateCode();
+                currentScope = currentFunctionScope != null ? currentFunctionScope : getIntermediateCode();
             }
             SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(),currentScope , ScopeType.LOCAL);
             if (symbol==null)
@@ -327,7 +337,7 @@ public class Translator extends SPLBaseVisitor<String> {
             }
 
             intermediateCode.append(function_code);
-            inlineProc(procMap.get(function.getName()));
+            inlineProc(function.getName(), procMap.get(function.getName()));
             
         }
         return null;
@@ -376,14 +386,15 @@ public class Translator extends SPLBaseVisitor<String> {
     {
         if (ctx.term()!= null) // ASSIGN ::= VAR=TERM
         {
-            SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), ScopeType.MAIN);
+            String scopeToUse = currentFunctionScope != null ? currentFunctionScope : getIntermediateCode();
+            SymbolEntry symbol = symbolTable.lookupVariable(ctx.var().getText(), scopeToUse, ScopeType.LOCAL);
             if (symbol==null)
             {
-                symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), ScopeType.LOCAL);
+                symbol = symbolTable.lookupVariable(ctx.var().getText(), scopeToUse, ScopeType.MAIN);
             }
             if (symbol==null)
             {
-                symbol = symbolTable.lookupVariable(ctx.var().getText(), getIntermediateCode(), null);
+                symbol = symbolTable.lookupVariable(ctx.var().getText(), scopeToUse, null);
             }
             String t1 = visitTerm(ctx.term(), null, null);
 
