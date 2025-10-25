@@ -1,0 +1,13 @@
+glob {}
+proc {
+    printValue(x) {
+        local {}
+        print x
+    }
+}
+func {}
+main {
+    var {}
+    printValue(42);
+    halt
+}

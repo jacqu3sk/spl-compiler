@@ -1,0 +1,23 @@
+glob {}
+proc {}
+func {}
+main {
+    var {
+        a
+        b
+        c
+    }
+    a = 1;
+    b = 2;
+    c = 3;
+    print a;
+    print b;
+    print c;
+    a = (a plus 1);
+    b = (b plus 1);
+    c = (c plus 1);
+    print a;
+    print b;
+    print c;
+    halt
+}

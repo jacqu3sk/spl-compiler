@@ -1,0 +1,14 @@
+glob {
+    x
+    y
+    z
+}
+proc {}
+func {}
+main {
+    var {
+        a
+        b
+    }
+    halt
+}

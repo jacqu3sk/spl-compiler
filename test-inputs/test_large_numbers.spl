@@ -1,0 +1,11 @@
+glob {}
+proc {}
+func {}
+main {
+    var {
+        big
+    }
+    big = 999999999;
+    print big;
+    halt
+}

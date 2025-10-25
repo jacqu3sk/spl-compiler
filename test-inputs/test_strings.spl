@@ -1,0 +1,11 @@
+glob {}
+proc {}
+func {}
+main {
+    var {}
+    print "Hello, World!";
+    print "Testing 123";
+    print "Special chars: !@#$%^&*()";
+    print "";
+    halt
+}

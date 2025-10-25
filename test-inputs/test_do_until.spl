@@ -1,0 +1,14 @@
+glob {}
+proc {}
+func {}
+main {
+    var {
+        counter
+    }
+    counter = 0;
+    do {
+        print counter;
+        counter = 1
+    } until (counter eq 1);
+    halt
+}

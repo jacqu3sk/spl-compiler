@@ -1,0 +1,13 @@
+glob {}
+proc {
+    doNothing() {
+        local {}
+        print "Nothing"
+    }
+}
+func {}
+main {
+    var {}
+    doNothing();
+    halt
+}

@@ -1,0 +1,13 @@
+glob {}
+proc {}
+func {}
+main {
+    var {
+        x
+    }
+    x = 5;
+    if (x eq 5) {
+        print "Equal"
+    };
+    halt
+}

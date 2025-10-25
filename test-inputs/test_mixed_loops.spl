@@ -1,0 +1,16 @@
+glob {}
+proc {}
+func {}
+main {
+    var {
+        x
+    }
+    x = 0;
+    while (x eq 0) {
+        do {
+            print x;
+            x = 1
+        } until (x eq 1)
+    };
+    halt
+}

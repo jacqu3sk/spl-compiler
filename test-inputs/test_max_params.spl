@@ -1,0 +1,16 @@
+glob {}
+proc {}
+func {
+    addThree(a b c) {
+        local {}
+        a = a;
+        return ((a plus b) plus c)
+    }
+}
+main {
+    var {
+        result
+    }
+    result = addThree(1 2 3);
+    halt
+}
