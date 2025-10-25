@@ -1,0 +1,22 @@
+glob {}
+proc {
+    noParams() {
+        local {}
+        print "No parameters"
+    }
+}
+func {
+    returnFive() {
+        local {}
+        print "Returning five";
+        return 5
+    }
+}
+main {
+    var {
+        x
+    }
+    noParams();
+    x = returnFive();
+    halt
+}

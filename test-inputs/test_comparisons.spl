@@ -1,0 +1,18 @@
+glob {}
+proc {}
+func {}
+main {
+    var {
+        a
+        b
+    }
+    a = 5;
+    b = 10;
+    if (a eq b) {
+        print "Equal"
+    };
+    if (b > a) {
+        print "Greater"
+    };
+    halt
+}

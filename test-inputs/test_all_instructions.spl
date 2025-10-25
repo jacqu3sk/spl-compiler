@@ -1,0 +1,36 @@
+glob {
+    g
+}
+proc {
+    myProc() {
+        local {}
+        print "Proc called"
+    }
+}
+func {
+    myFunc() {
+        local {}
+        print "Func called";
+        return 1
+    }
+}
+main {
+    var {
+        x
+        y
+    }
+    x = 10;
+    y = myFunc();
+    myProc();
+    print x;
+    if (x eq 10) {
+        print "Yes"
+    };
+    while (x eq 0) {
+        x = 1
+    };
+    do {
+        x = 1
+    } until (x eq 1);
+    halt
+}

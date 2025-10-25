@@ -1,0 +1,16 @@
+glob {}
+proc {
+    useLocal() {
+        local {
+            temp
+        }
+        temp = 5;
+        print temp
+    }
+}
+func {}
+main {
+    var {}
+    useLocal();
+    halt
+}

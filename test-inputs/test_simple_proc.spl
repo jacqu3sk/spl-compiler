@@ -1,0 +1,13 @@
+glob {}
+proc {
+    myProc() {
+        local {}
+        print "Proc executed"
+    }
+}
+func {}
+main {
+    var {}
+    myProc();
+    halt
+}

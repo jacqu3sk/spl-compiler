@@ -1,0 +1,19 @@
+glob {}
+proc {}
+func {}
+main {
+    var {
+        x
+    }
+    x = 1;
+    if ((x eq 1) and (x eq 1)) {
+        print "And works"
+    };
+    if ((x eq 0) or (x eq 1)) {
+        print "Or works"
+    };
+    if (not (x eq 0)) {
+        print "Not works"
+    };
+    halt
+}

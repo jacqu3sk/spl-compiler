@@ -1,0 +1,19 @@
+glob {}
+proc {}
+func {}
+main {
+    var {
+        outer
+        inner
+    }
+    outer = 0;
+    while (outer eq 0) {
+        inner = 0;
+        while (inner eq 0) {
+            print inner;
+            inner = 1
+        };
+        outer = 1
+    };
+    halt
+}

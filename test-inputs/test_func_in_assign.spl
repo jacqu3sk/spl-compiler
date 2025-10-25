@@ -1,0 +1,19 @@
+glob {}
+proc {}
+func {
+    getValue(x) {
+        local {
+            result
+        }
+        result = (x mult 2);
+        return result
+    }
+}
+main {
+    var {
+        result
+    }
+    result = getValue(21);
+    print result;
+    halt
+}
