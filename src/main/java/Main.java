@@ -145,7 +145,7 @@ public class Main {
         }
         
         TypeErrorListener typeErrorListener = basicOnly ? new SilentTypeErrorListener() : new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
         if (tc_ok) {
             if (!basicOnly) System.out.println("✓ Type Checking Completed Successfully!");
@@ -222,7 +222,7 @@ public class Main {
                 print x;
                 a = 2;
                 if ((x eq 10) and (a eq 2)) {
-                    y = gx(15)
+                    y = gx(10)
                 }else{
                     y = gx(25)
                 };
