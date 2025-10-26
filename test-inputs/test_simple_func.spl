@@ -1,0 +1,16 @@
+glob {}
+proc {}
+func {
+    getNumber() {
+        local {}
+        print "Getting number";
+        return 42
+    }
+}
+main {
+    var {
+        result
+    }
+    result = getNumber();
+    halt
+}

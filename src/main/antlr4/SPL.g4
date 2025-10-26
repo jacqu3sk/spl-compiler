@@ -1,5 +1,9 @@
 grammar SPL;
 
+@header {
+package generated;
+}
+
 // Parser Rules
 spl_prog
     : 'glob' '{' variables '}' 
