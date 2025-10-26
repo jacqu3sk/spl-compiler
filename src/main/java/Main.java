@@ -6,6 +6,9 @@ import symbolTable.*;
 import translator.Translator;
 import typeChecker.*;
 import basic.BasicCodeGenerator;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) {
@@ -179,6 +182,11 @@ public class Main {
         if (basicOnly) {
             // Only print the BASIC code, nothing else
             System.out.print(basicCode);
+            try {
+                Files.writeString(Path.of("output.txt"), basicCode);
+            } catch (Exception e) {
+                System.err.println("Error writing BASIC code to output.txt: " + e.getMessage());
+            }
         } else {
             basicGenerator.printBasicCode();
             System.out.println("\n=================================================");
