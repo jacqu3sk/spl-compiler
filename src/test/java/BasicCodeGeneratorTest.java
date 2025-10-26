@@ -54,7 +54,7 @@ STOP
 30 t3 = t1+t2
 40 v1 = t3
 50 PRINT v1
-60 STOP
+60 END
 """;
         
         assertEquals(expected, result);
@@ -94,11 +94,11 @@ STOP
 80 REM L1
 90 t4 = 10
 100 v5 = t4
-110 STOP
+110 END
 120 t5 = v5
 130 v2 = t5
 140 REM L2
-150 STOP
+150 END
 """;
         
         assertEquals(expected, result);
@@ -141,18 +141,18 @@ STOP
 60 IF t2=t3 THEN 130
 70 t4 = 20
 80 v5 = t4
-90 STOP
+90 END
 100 t5 = v5
 110 v2 = t5
 120 GOTO 190
 130 REM L1
 140 t6 = 10
 150 v5 = t6
-160 STOP
+160 END
 170 t7 = v5
 180 v2 = t7
 190 REM L2
-200 STOP
+200 END
 """;
         
         assertEquals(expected, result);
@@ -202,7 +202,7 @@ STOP
 150 v7 = t7
 160 GOTO 60
 170 REM L3
-180 STOP
+180 END
 """;
         
         // There's an issue here - REM L2 appears before its reference
@@ -225,7 +225,7 @@ STOP
 150 v7 = t7
 160 GOTO 60
 170 REM L3
-180 STOP
+180 END
 """;
         
         assertEquals(expectedCorrected, result);
@@ -271,7 +271,7 @@ STOP
 130 IF t6=t7 THEN 150
 140 GOTO 60
 150 REM L2
-160 STOP
+160 END
 """;
         
         assertEquals(expected, result);
@@ -299,7 +299,7 @@ STOP
 40 GOTO 50
 50 REM L2
 60 IF x=y THEN 10
-70 STOP
+70 END
 """;
         
         assertEquals(expected, result);
@@ -321,7 +321,7 @@ STOP
 20 REM L0
 40 GOTO 60
 60 REM L1
-80 STOP
+80 END
 """;
         
         assertEquals(expected, result);
