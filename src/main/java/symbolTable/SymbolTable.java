@@ -1,6 +1,9 @@
 package symbolTable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Symbol table for the SPL compiler
@@ -155,6 +158,27 @@ public class SymbolTable {
         }
         
         // Finally, check global scope (accessible from everywhere)
+        if (globalVariables.containsKey(name)) {
+            return globalVariables.get(name);
+        }
+        
+        return null; // Not found
+    }
+
+    public SymbolEntry lookupAnyVariable(String name) {
+        // Check local scopes
+        for (Map<String, SymbolEntry> localScope : localScopes.values()) {
+            if (localScope.containsKey(name)) {
+                return localScope.get(name);
+            }
+        }
+        
+        // Check main scope
+        if (mainVariables.containsKey(name)) {
+            return mainVariables.get(name);
+        }
+        
+        // Check global scope
         if (globalVariables.containsKey(name)) {
             return globalVariables.get(name);
         }

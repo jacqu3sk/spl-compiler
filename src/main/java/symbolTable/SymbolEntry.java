@@ -8,6 +8,7 @@ public class SymbolEntry {
     private String scopeOwner; // Name of procedure/function if in local scope
     private boolean isParameter; // True if this is a parameter
     private String tempVariable; //Temporary variable name for intermediate code generation
+    private int numParams;
     
     // Constructor
     public SymbolEntry(String name, SymbolType type, ScopeType scope, 
@@ -19,6 +20,7 @@ public class SymbolEntry {
         this.scopeOwner = scopeOwner;
         this.isParameter = isParameter;
         this.tempVariable = "";
+        this.numParams = 0;
     }
     
     public String getName() {
@@ -66,6 +68,10 @@ public class SymbolEntry {
     public String getTempVariable() {
         return tempVariable;
     }
+
+    public int getNumParams() {
+        return numParams;
+    }
     
     public void setNodeId(int newId) {
         nodeId = newId;
@@ -82,4 +88,9 @@ public class SymbolEntry {
     public void setTempVariable(String temp) {
         tempVariable = temp;
     }
+
+    public void setNumParams(int n) {
+        numParams = n;
+    }
+
 }

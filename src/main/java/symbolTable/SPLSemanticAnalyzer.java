@@ -1,10 +1,13 @@
 package symbolTable;
 
-import org.antlr.v4.runtime.tree.*;
-import org.antlr.v4.runtime.ParserRuleContext;
-import generated.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
 
-import java.util.*;
+import org.antlr.v4.runtime.ParserRuleContext;
+
+import generated.SPLBaseListener;
+import generated.SPLParser;
 
 public class SPLSemanticAnalyzer extends SPLBaseListener {
     private SymbolTable symbolTable;
@@ -155,6 +158,8 @@ public class SPLSemanticAnalyzer extends SPLBaseListener {
             null,
             false
         );
+
+        entry.setNumParams(ctx.param().maxthree().var().size());
         
         symbolTable.addSymbol(entry);
         
@@ -201,6 +206,8 @@ public class SPLSemanticAnalyzer extends SPLBaseListener {
             null,
             false
         );
+
+        entry.setNumParams(ctx.param().maxthree().var().size());
         
         symbolTable.addSymbol(entry);
         

@@ -1,19 +1,24 @@
-import generated.SPLLexer;
-import generated.SPLParser;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.Test;
+
+import generated.SPLLexer;
+import generated.SPLParser;
 import parser.SyntaxErrorListener;
+import symbolTable.SPLSemanticAnalyzer;
+import symbolTable.SymbolTable;
 import typeChecker.TypeChecker;
 import typeChecker.TypeErrorListener;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class TypeCheckerTest {
 
@@ -506,8 +511,19 @@ class TypeCheckerTest {
             ParseTree tree = parser.spl_prog();
             assertFalse(syntaxErrors.hasErrors(), "Provided SPL program contains syntax errors");
 
+            ParseTreeWalker walker = new ParseTreeWalker();
+            SPLSemanticAnalyzer analyzer = new SPLSemanticAnalyzer();
+            
+            // Walk the parse tree
+            walker.walk(analyzer, tree);
+            
+            // Get results
+            SymbolTable symbolTable = analyzer.getSymbolTable();
+            
+            assertFalse(symbolTable.hasErrors(), "Provided SPL program contains semantic errors");
+
             CollectingTypeErrorListener listener = new CollectingTypeErrorListener();
-            TypeChecker checker = new TypeChecker(listener);
+            TypeChecker checker = new TypeChecker(symbolTable, listener);
             boolean success = checker.visit(tree);
             return new TypeCheckResult(success, listener.messages);
         } catch (Exception e) {

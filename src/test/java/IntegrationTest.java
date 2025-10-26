@@ -144,7 +144,7 @@ public class IntegrationTest {
         
         // Type Checking
         TypeErrorListener typeErrorListener = new TestTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
         
         if (!tc_ok) {

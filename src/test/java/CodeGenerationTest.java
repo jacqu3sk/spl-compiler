@@ -1,6 +1,3 @@
-import generated.SPLLexer;
-import generated.SPLParser;
-
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -9,15 +6,17 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
+
+import generated.SPLLexer;
+import generated.SPLParser;
 import symbolTable.SPLSemanticAnalyzer;
 import symbolTable.SymbolTable;
 import translator.Translator;
 import typeChecker.ConsoleTypeErrorListener;
 import typeChecker.TypeChecker;
 import typeChecker.TypeErrorListener;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class CodeGenerationTest {
     
@@ -90,7 +89,7 @@ public class CodeGenerationTest {
         SymbolTable symbolTable = analyzer.getSymbolTable();
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
@@ -177,7 +176,7 @@ STOP
         SymbolTable symbolTable = analyzer.getSymbolTable();
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
@@ -269,7 +268,7 @@ STOP
         SymbolTable symbolTable = analyzer.getSymbolTable();
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
@@ -359,7 +358,7 @@ STOP
         SymbolTable symbolTable = analyzer.getSymbolTable();
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
@@ -461,7 +460,7 @@ STOP
         SymbolTable symbolTable = analyzer.getSymbolTable();
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
@@ -568,7 +567,7 @@ STOP
         SymbolTable symbolTable = analyzer.getSymbolTable();
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
@@ -676,7 +675,7 @@ STOP
         SymbolTable symbolTable = analyzer.getSymbolTable();
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
@@ -791,7 +790,7 @@ STOP
         SymbolTable symbolTable = analyzer.getSymbolTable();
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
@@ -902,7 +901,7 @@ STOP
         SymbolTable symbolTable = analyzer.getSymbolTable();
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
@@ -1004,7 +1003,7 @@ STOP
         SymbolTable symbolTable = analyzer.getSymbolTable();
 
         TypeErrorListener typeErrorListener = new ConsoleTypeErrorListener();
-        TypeChecker typeChecker = new TypeChecker(typeErrorListener);
+        TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         typeChecker.visit((SPLParser.Spl_progContext) tree);
 
         Translator translator = new Translator(symbolTable,tree);
