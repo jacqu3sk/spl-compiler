@@ -107,7 +107,7 @@ public class Translator extends SPLBaseVisitor<String> {
         Path filePath = Path.of("intermediateCode.html");
         try{
             Files.writeString(filePath, html, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-            System.out.println("HTML file created successfully: " + filePath.toAbsolutePath());
+            System.out.println("HTML file created: " + filePath.toAbsolutePath());
         } catch (IOException e) {
             System.out.println(e);
         }

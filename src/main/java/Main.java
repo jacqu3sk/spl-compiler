@@ -17,7 +17,7 @@ public class Main {
         try {
             // Check if input file is provided
             if (args.length < 1) {
-                System.out.println("\nNo input file specified :(\n");
+                System.out.println("\nNo input file specified :(");
                 System.out.println("Running with example input instead...\n");
                 runWithExampleInput();
                 return;
@@ -55,7 +55,7 @@ public class Main {
             System.out.println("Source: " + sourceName);
             System.out.println("=================================================\n");
         }
-        
+        System.out.println("=================================================");
         System.out.println("SPL COMPILER: Front-End Phase");
         System.out.println("=================================================\n");
         
@@ -115,8 +115,12 @@ public class Main {
         
         if (!basicOnly) System.out.println("Syntax accepted");
         
+        System.out.println("\n=================================================");
+        System.out.println("Semantic Analysis Phase");
+        System.out.println("=================================================\n");
+        
         // Step 3: Semantic Analysis
-        if (!basicOnly) System.out.println("\nPhase 3: Semantic Analysis...");
+        if (!basicOnly) System.out.println("Phase 3: Semantic Analysis (Name-Scope Analyser)...");
         ParseTreeWalker walker = new ParseTreeWalker();
         SPLSemanticAnalyzer analyzer = new SPLSemanticAnalyzer();
         
@@ -128,77 +132,56 @@ public class Main {
         
         // Step 4: Report Results
         if (!basicOnly) {
-            System.out.println("\n=================================================");
-            System.out.println("SEMANTIC ANALYSIS RESULTS");
-            System.out.println("=================================================");
-            
             if (symbolTable.hasErrors()) {
-                System.out.println("\n✗ Semantic errors found:\n");
+                System.out.println("Type error:");
                 int errorNum = 1;
                 for (String error : symbolTable.getErrors()) {
                     System.out.println(errorNum + ". " + error);
                     errorNum++;
                 }
-                System.out.println("\nTotal errors: " + symbolTable.getErrors().size());
+                System.out.println("Total errors: " + symbolTable.getErrors().size() + "\n");
             } else {
-                System.out.println("\n✓ No semantic errors found!");
-                System.out.println("✓ All name-scope rules are satisfied.");
+                System.out.println("Variable Naming and Function Naming accepted");
             }
-            
-            // Print symbol table
-            symbolTable.printTable();
-            
-            System.out.println("\n=================================================");
-            if (!symbolTable.hasErrors()) {
-                System.out.println("Compilation Status: SUCCESS");
-                System.out.println("Ready to proceed to next phase (code generation)");
-            } else {
-                System.out.println("Compilation Status: FAILED");
-                System.out.println("Fix semantic errors before proceeding");
-            }
-            System.out.println("=================================================\n");
         }
         
         // Exit early if there are errors
         if (symbolTable.hasErrors()) {
             return;
         }
-
+    
         // Step 5: Type Checking
-        if (!basicOnly) {
-            System.out.println("\n=================================================");
-            System.out.println("Phase 4: Type Checking...");
-            System.out.println("=================================================");
-        }
+        if (!basicOnly) System.out.println("\nPhase 4: Semantic Analysis (Type-Checker)...");
         
         TypeErrorListener typeErrorListener = basicOnly ? new SilentTypeErrorListener() : new ConsoleTypeErrorListener();
         TypeChecker typeChecker = new TypeChecker(symbolTable, typeErrorListener);
         Boolean tc_ok = typeChecker.visit((SPLParser.Spl_progContext) tree);
         if (tc_ok) {
-            if (!basicOnly) System.out.println("✓ Type Checking Completed Successfully!");
+            if (!basicOnly) System.out.println("Types accepted");
         }
         else {
-            if (!basicOnly) System.out.println("✗ Type Checking failed");
             return;
         }
 
         // Step 6: Code Generation (Intermediate Code)
         if (!basicOnly) {
             System.out.println("\n=================================================");
-            System.out.println("Phase 5: Intermediate Code Generation...");
+            System.out.println(" Intermediate Code Generation Phase");
             System.out.println("=================================================");
         }
+        if (!basicOnly) System.out.println("\nPhase 5: Intermediate Code Generation...");
         
         Translator translator = new Translator(symbolTable,tree);
         translator.generateIntermediateCode();
-        if (!basicOnly) translator.printIntermediateCode();
+        //if (!basicOnly) translator.printIntermediateCode();
         
         // Step 7: BASIC Code Generation
         if (!basicOnly) {
             System.out.println("\n=================================================");
-            System.out.println("Phase 6: BASIC Code Generation...");
+            System.out.println(" BASIC Code Generation Phase...");
             System.out.println("=================================================");
         }
+        if (!basicOnly) System.out.println("\nPhase 6: Executable BASIC Code...");
         
         BasicCodeGenerator basicGenerator = new BasicCodeGenerator(translator.getIntermediateCode());
         String basicCode = basicGenerator.generateBasicCode();
@@ -208,16 +191,25 @@ public class Main {
             System.out.print(basicCode);
             try {
                 Files.writeString(Path.of("output.txt"), basicCode);
+                System.out.println("output.txt created: " + Path.of("output.txt"));
             } catch (Exception e) {
                 System.err.println("Error writing BASIC code to output.txt: " + e.getMessage());
             }
         } else {
-            basicGenerator.printBasicCode();
+            //System.out.print(basicCode);
+            try {
+                Files.writeString(Path.of("output.txt"), basicCode);
+                System.out.println("output.txt created ");
+            } catch (Exception e) {
+                System.err.println("Error writing BASIC code to output.txt: " + e.getMessage());
+            }
+
             System.out.println("\n=================================================");
             System.out.println("COMPILATION COMPLETE!");
             System.out.println("=================================================\n");
         }
-    }
+
+      }
     
     /**
      * Run with example SPL program for demonstration
