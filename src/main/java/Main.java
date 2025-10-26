@@ -9,6 +9,8 @@ import basic.BasicCodeGenerator;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -50,14 +52,15 @@ public class Main {
     public static void compile(CharStream input, String sourceName, boolean basicOnly) {
         if (!basicOnly) {
             System.out.println("=================================================");
-            System.out.println("SPL COMPILER: Front-End Phase");
-            System.out.println("=================================================");
             System.out.println("Source: " + sourceName);
             System.out.println("=================================================\n");
         }
         
+        System.out.println("SPL COMPILER: Front-End Phase");
+        System.out.println("=================================================\n");
+        
         // Step 1: Lexical Analysis
-        if (!basicOnly) System.out.println("Phase 1: Lexical Analysis...");
+        if (!basicOnly) System.out.println("Phase 1:(Lexer) Lexical Analysis...");
         SPLLexer lexer = new SPLLexer(input);
         lexer.removeErrorListeners();
         final boolean finalBasicOnly = basicOnly;
@@ -71,7 +74,7 @@ public class Main {
                                   RecognitionException e) {
                 if (!finalBasicOnly) {
                     System.err.println("Lexical Error: at line " + line + ":" + 
-                                     charPositionInLine + " - " + msg);
+                                     charPositionInLine + " -> " + msg);
                     hasLexicalError[0] = true;
                 }
             }
@@ -86,12 +89,11 @@ public class Main {
         }
         
         // Step 2: Syntax Analysis (Parsing)
-        if (!basicOnly) System.out.println("Phase 2: Syntax Analysis...");
+        if (!basicOnly) System.out.println("\nPhase 2:(Parser) Syntax Analysis...");
         SPLParser parser = new SPLParser(tokens);
-        
         // Error handling for parser
-        /*parser.removeErrorListeners();
-        final boolean finalBasicOnly = basicOnly;
+        parser.removeErrorListeners();
+        List<String> syntaxErrors = new ArrayList<>();
         parser.addErrorListener(new BaseErrorListener() {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer,
@@ -99,22 +101,19 @@ public class Main {
                                   int line, int charPositionInLine,
                                   String msg,
                                   RecognitionException e) {
-                if (!finalBasicOnly) {
-                    System.err.println("Syntax Error at line " + line + ":" + 
-                                     charPositionInLine + " - " + msg);
-                }
+                syntaxErrors.add("Line " + line + ":" + charPositionInLine + " -> " + msg);
             }
-        });*/
-        
+        }); 
         ParseTree tree = parser.spl_prog();
         
         // Check if parsing was successful
         if (parser.getNumberOfSyntaxErrors() > 0) {
-            if (!basicOnly) System.out.println("\n✗ Compilation failed due to syntax errors.");
+            if (!basicOnly) System.out.println("Syntax error: ");
+            syntaxErrors.forEach(System.err::println);
             return;
         }
         
-        if (!basicOnly) System.out.println("✓ Parsing successful");
+        if (!basicOnly) System.out.println("Syntax accepted");
         
         // Step 3: Semantic Analysis
         if (!basicOnly) System.out.println("\nPhase 3: Semantic Analysis...");
@@ -251,7 +250,7 @@ public class Main {
                     a
                     b
                 }
-                x = 10; *
+                x = 10; 
                 print x;
                 a = 2;
                 if ((x eq 10) and (a eq 2)) {
