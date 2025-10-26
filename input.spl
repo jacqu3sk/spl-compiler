@@ -1,0 +1,38 @@
+glob {
+    x
+    y
+}
+
+proc {
+    hx() {
+        local{}
+        halt
+    }
+}
+
+func {
+    gx(value) {
+        local{
+            newvalue
+        }
+        newvalue = (value plus 1);
+        return newvalue
+    }
+}
+
+main {
+    var {
+        a
+        b
+    }
+    x = 10;
+    print x;
+    a = 2;
+    if ((x eq 10) and (a eq 2)) {
+        y = gx(10)
+    } else {
+        y = gx(25)
+    };
+    print y;
+    halt
+}
