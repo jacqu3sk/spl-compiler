@@ -68,6 +68,13 @@ public class BasicCodeGenerator {
                     labelToLineNumber.put(label, currentLineNumber);
                 }
             }
+
+            // If this line is a STOP, change to END
+            if (line.contains("STOP")) {
+                
+            System.out.println(line);
+                numberedLines[i] = currentLineNumber + " END";
+            }
             
             currentLineNumber += lineNumberStep;
         }

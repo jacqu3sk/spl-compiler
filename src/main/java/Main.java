@@ -15,7 +15,8 @@ public class Main {
         try {
             // Check if input file is provided
             if (args.length < 1) {
-                System.out.println("\nRunning with example input instead...\n");
+                System.out.println("\nNo input file specified :(\n");
+                System.out.println("Running with example input instead...\n");
                 runWithExampleInput();
                 return;
             }
@@ -49,7 +50,7 @@ public class Main {
     public static void compile(CharStream input, String sourceName, boolean basicOnly) {
         if (!basicOnly) {
             System.out.println("=================================================");
-            System.out.println("SPL COMPILER - Semantic Analysis Phase");
+            System.out.println("SPL COMPILER: Front-End Phase");
             System.out.println("=================================================");
             System.out.println("Source: " + sourceName);
             System.out.println("=================================================\n");
@@ -58,14 +59,38 @@ public class Main {
         // Step 1: Lexical Analysis
         if (!basicOnly) System.out.println("Phase 1: Lexical Analysis...");
         SPLLexer lexer = new SPLLexer(input);
+        lexer.removeErrorListeners();
+        final boolean finalBasicOnly = basicOnly;
+        final boolean[] hasLexicalError = {false};
+        lexer.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer,
+                                  Object offendingSymbol,
+                                  int line, int charPositionInLine,
+                                  String msg,
+                                  RecognitionException e) {
+                if (!finalBasicOnly) {
+                    System.err.println("Lexical Error: at line " + line + ":" + 
+                                     charPositionInLine + " - " + msg);
+                    hasLexicalError[0] = true;
+                }
+            }
+        });
         CommonTokenStream tokens = new CommonTokenStream(lexer);
+        tokens.fill();
+        if (!hasLexicalError[0])
+        {
+            System.out.println("Tokens accepted");
+        }else{
+            return;
+        }
         
         // Step 2: Syntax Analysis (Parsing)
         if (!basicOnly) System.out.println("Phase 2: Syntax Analysis...");
         SPLParser parser = new SPLParser(tokens);
         
         // Error handling for parser
-        parser.removeErrorListeners();
+        /*parser.removeErrorListeners();
         final boolean finalBasicOnly = basicOnly;
         parser.addErrorListener(new BaseErrorListener() {
             @Override
@@ -79,7 +104,7 @@ public class Main {
                                      charPositionInLine + " - " + msg);
                 }
             }
-        });
+        });*/
         
         ParseTree tree = parser.spl_prog();
         
@@ -226,7 +251,7 @@ public class Main {
                     a
                     b
                 }
-                x = 10;
+                x = 10; *
                 print x;
                 a = 2;
                 if ((x eq 10) and (a eq 2)) {
